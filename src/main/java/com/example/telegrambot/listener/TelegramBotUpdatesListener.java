@@ -17,6 +17,8 @@ import org.springframework.stereotype.Component;
 //import javax.annotation.PostConstruct;
 import java.util.List;
 
+import static com.example.telegrambot.constants.ConstantValue.*;
+
 /**
  * Объект, уведомляемый о событии.
  * Он должен быть зарегистрирован источником событий
@@ -56,16 +58,14 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
 
                         if ("/start".equals(text)) {
-                            SendMessage sendMessage = new SendMessage(chatId, "Здравствуйте!\n" +
-                                    "Вас приветствует приют домашних животных города Астаны!\n" +
-                                    "Выберете, пожалуйста, приют!");
+                            SendMessage sendMessage = new SendMessage(chatId, GREETINGS_AT_THE_PET_SHELTER);
                         /*}
                         if (update.message() == null) {
                             processMessage(update);
                         } else {*/
                             sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsShelterTypeSelect());
                             telegramBot.execute(sendMessage);
-                            processButtonClick(update);
+                            //processButtonClick(update);
                         }
                     });
         } catch (Exception e) {
@@ -82,40 +82,6 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         }
     }
 
-    private void processButtonClick(Update update) {
-        CallbackQuery callbackQuery = update.callbackQuery();
-        if (callbackQuery != null) {
-            long chatId = callbackQuery.message().chat().id();
-            switch (callbackQuery.data()) {
-                case "button_Cat_Shelter_clicked":
-                    // Cat shelter selected
-                    sendButtonClickMessage(chatId, "button_Cat_Shelter_clicked");
-                    //processCatShelterClick(chatId);
-                    break;
-                case "button_Dog_Shelter_clicked":
-                    // Dog shelter selected
-                    sendButtonClickMessage(chatId, "button_Dog_Shelter_clicked");
-                    //processDogShelterClick(chatId);
-                    break;
 
-            }
-        }
-    }
-
-    private void sendButtonClickMessage(long chatId, String message) {
-        sendMessage(chatId, message);
-    }
-
-    /*private void processCatShelterClick(long chatId) {
-        shelterType = PetType.CAT;
-        saveGuest(chatId, shelterType);
-        sendStage0Message(chatId, CAT_SHELTER_WELCOME_MSG_TEXT);
-    }
-
-    private void processDogShelterClick(long chatId) {
-        shelterType = DOG;
-        saveGuest(chatId, shelterType);
-        sendStage0Message(chatId, DOG_SHELTER_WELCOME_MSG_TEXT);
-    }*/
 
 }
