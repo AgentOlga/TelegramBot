@@ -1,6 +1,6 @@
 # TelegramBot
 
-Development team
+Development team:
 
 Алексей Кущенко
 Ольга Филиппова
