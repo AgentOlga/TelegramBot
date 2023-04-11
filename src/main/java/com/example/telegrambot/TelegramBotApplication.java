@@ -9,9 +9,7 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 @SpringBootApplication
 public class TelegramBotApplication {
 
-    public static void main(String[] args) throws TelegramApiException {
-        TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
-        botsApi.registerBot(new Bot());
+    public static void main(String[] args) {
+        SpringApplication.run(TelegramBotApplication.class, args);
     }
-
 }
