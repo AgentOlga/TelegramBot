@@ -54,7 +54,6 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                             sendMessage(chatId, "Здравствуйте!\n" +
                                     "Вас приветствует приют домашних животных города Астаны!\n" +
                                     "Выберете, пожалуйста, приют!");
-
                         }
                     });
         } catch (Exception e) {
