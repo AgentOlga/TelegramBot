@@ -43,7 +43,7 @@ public class UserRequestServiceImpl implements UserRequestService {
 
         getStart(chatId);
 
-        if ("/start".equals(text)||"Главное меню".equals(text)) {
+        if ("/start".equals(text)) {
 
             userName = update.message().from().username();
             SendMessage sendMessage =
@@ -74,6 +74,11 @@ public class UserRequestServiceImpl implements UserRequestService {
                     getDogShelterClick(chatId);
 
                     break;
+                case CLICK_BACK_TO_SHELTER_TYPE:
+
+                    getMainMenuClick(chatId);
+
+                    break;
                 case CLICK_CAT_SHELTER_INFO:
 
                     getCatShelterInfoClick(chatId);
@@ -84,10 +89,92 @@ public class UserRequestServiceImpl implements UserRequestService {
                     getDogShelterInfoClick(chatId);
 
                     break;
+                case CLICK_HOW_TO_ADOPT_A_CAT:
 
+                    getCatShelterTakeClick(chatId);
+
+                    break;
+                case CLICK_HOW_TO_ADOPT_A_DOG:
+
+                    getDogShelterTakeClick(chatId);
+
+                    break;
+                case CLICK_SEND_A_CAT_REPORT:
+
+                    getCatShelterReportClick(chatId);
+
+                    break;
+                case CLICK_SEND_A_DOG_REPORT:
+
+                    getDogShelterReportClick(chatId);
+
+                    break;
+                case CLICK_CALL_A_VOLUNTEER:
+
+                    //todo взаимодействие с волонтером
+
+                    break;
+                case CLICK_ARRANGEMENT_CAT_HOME:
+
+                    getCatAtHomeClick(chatId);
+
+                    break;
+                case CLICK_ARRANGEMENT_DOG_HOME:
+
+                    getDogAtHomeClick(chatId);
+
+                    break;
 
             }
         }
+    }
+
+    private void getDogAtHomeClick(long chatId) {
+
+        SendMessage sendMessage = new SendMessage(chatId, GREETINGS_AT_THE_SHELTER_INFO);
+        sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsDogAtHome());
+
+        sendMessage(sendMessage);
+    }
+
+    private void getCatAtHomeClick(long chatId) {
+
+        SendMessage sendMessage = new SendMessage(chatId, GREETINGS_AT_THE_SHELTER_INFO);
+        sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsCatAtHome());
+
+        sendMessage(sendMessage);
+    }
+
+    private void getDogShelterReportClick(long chatId) {
+
+        SendMessage sendMessage = new SendMessage(chatId, GREETINGS_AT_THE_SHELTER_INFO);
+        sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsDogShelterReport());
+
+        sendMessage(sendMessage);
+    }
+
+    private void getCatShelterReportClick(long chatId) {
+
+        SendMessage sendMessage = new SendMessage(chatId, GREETINGS_AT_THE_SHELTER_INFO);
+        sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsCatShelterReport());
+
+        sendMessage(sendMessage);
+    }
+
+    private void getDogShelterTakeClick(long chatId) {
+
+        SendMessage sendMessage = new SendMessage(chatId, GREETINGS_AT_THE_SHELTER_INFO);
+        sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsDogShelterTake());
+
+        sendMessage(sendMessage);
+    }
+
+    private void getCatShelterTakeClick(long chatId) {
+
+        SendMessage sendMessage = new SendMessage(chatId, GREETINGS_AT_THE_SHELTER_INFO);
+        sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsCatShelterTake());
+
+        sendMessage(sendMessage);
     }
 
     private void sendMessage(SendMessage sendMessage) {
@@ -97,9 +184,17 @@ public class UserRequestServiceImpl implements UserRequestService {
         }
     }
 
+    private void getMainMenuClick(long chatId) {
+
+        SendMessage sendMessage = new SendMessage(chatId, GREETINGS_MAIN_MENU);
+        sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsShelterTypeSelect());
+
+        sendMessage(sendMessage);
+    }
+
     private void getDogShelterClick(long chatId) {
-        //shelterType = DOG;
-        //saveGuest(chatId, shelterType);
+
+        //сохраняем пользователя в БД приюта для собак
 
         SendMessage sendMessage = new SendMessage(chatId, GREETINGS_AT_THE_DOG_SHELTER);
         sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsDogShelter());
@@ -108,8 +203,8 @@ public class UserRequestServiceImpl implements UserRequestService {
     }
 
     private void getCatShelterClick(long chatId) {
-//        shelterType = PetType.CAT;
-//        saveUser(chatId, shelterType);
+
+        //сохраняем пользователя в БД приюта для кошек
 
         SendMessage sendMessage = new SendMessage(chatId, GREETINGS_AT_THE_CAT_SHELTER);
         sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsCatShelter());
@@ -133,6 +228,7 @@ public class UserRequestServiceImpl implements UserRequestService {
 
         sendMessage(sendMessage);
     }
+
     private void getStart(long chatId) {
 
         SendMessage sendMessage = new SendMessage(chatId, "");
@@ -140,6 +236,7 @@ public class UserRequestServiceImpl implements UserRequestService {
 
         sendMessage(sendMessage);
     }
+
     private void getMenu(long chatId) {
 
         SendMessage sendMessage = new SendMessage(chatId, "");
