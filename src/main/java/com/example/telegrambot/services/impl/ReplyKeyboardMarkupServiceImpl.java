@@ -1,12 +1,25 @@
 package com.example.telegrambot.services.impl;
 
+import com.example.telegrambot.services.ReplyKeyboardMarkupService;
+import com.pengrad.telegrambot.model.request.KeyboardButton;
+import com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup;
 import org.springframework.stereotype.Service;
+
+import static com.example.telegrambot.constants.ConstantValue.*;
 
 /**
  * Бизнес-логика по работе с кнопками под полем ввода.
  */
 @Service
-public class ReplyKeyboardMarkupServiceImpl /*implements ReplyKeyboardMarkupService*/ {
+public class ReplyKeyboardMarkupServiceImpl implements ReplyKeyboardMarkupService {
+
+    @Override
+    public ReplyKeyboardMarkup createStart() {
+        KeyboardButton keyboardButton = new KeyboardButton("/start");
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup(keyboardButton);
+        replyKeyboardMarkup.resizeKeyboard(true);
+        return replyKeyboardMarkup;
+    }
 
     /*@Override
     public void setButtons(SendMessage sendMessage) {

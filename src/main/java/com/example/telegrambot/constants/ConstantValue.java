@@ -15,6 +15,8 @@ public class ConstantValue {
             "Выберете, пожалуйста, вариант из предложенного меню!";
     public static final String GREETINGS_AT_THE_DOG_SHELTER = "Вы выбрали приют для собак!\n" +
             "Выберете, пожалуйста, вариант из предложенного меню!";
+    public static final String GREETINGS_AT_THE_SHELTER_INFO =
+            "Выберете, пожалуйста, вариант из предложенного меню!";
 
     /**
      * Название кнопок для КОШАЧЬЕГО приюта.
@@ -24,6 +26,10 @@ public class ConstantValue {
     public static final String BUTTON_HOW_TO_ADOPT_A_CAT = "Как взять питомца из приюта";
     public static final String BUTTON_SEND_A_CAT_REPORT = "Прислать отчет о питомце";
     public static final String BUTTON_CALL_A_VOLUNTEER_CAT = "Позвать волонтера";
+    public static final String BUTTON_CAT_SHELTER_OVERVIEW = "Обзор приюта";
+    public static final String BUTTON_CAR_PASS_CAT = "Оформить пропуск для автомобиля";
+    public static final String BUTTON_SAFETY_PRECAUTIONS_CAT = "Техника безопасности";
+    public static final String BUTTON_VISIT_CAT = "Записаться на посещение";
 
     /**
      * Название кнопок для СОБАЧЬЕГО приюта.
@@ -33,6 +39,10 @@ public class ConstantValue {
     public static final String BUTTON_HOW_TO_ADOPT_A_DOG = "Как взять питомца из приюта";
     public static final String BUTTON_SEND_A_DOG_REPORT = "Прислать отчет о питомце";
     public static final String BUTTON_CALL_A_VOLUNTEER_DOG = "Позвать волонтера";
+    public static final String BUTTON_DOG_SHELTER_OVERVIEW = "Обзор приюта";
+    public static final String BUTTON_CAR_PASS_DOG = "Оформить пропуск для автомобиля";
+    public static final String BUTTON_SAFETY_PRECAUTIONS_DOG = "Техника безопасности";
+    public static final String BUTTON_VISIT_DOG = "Записаться на посещение";
 
     /**
      * Текст под кнопками КОШАЧЬЕГО приюта- callbackQuery.data().
@@ -42,6 +52,10 @@ public class ConstantValue {
     public static final String CLICK_HOW_TO_ADOPT_A_CAT = "click_How_To_Adopt_A_Cat";
     public static final String CLICK_SEND_A_CAT_REPORT = "click_Send_A_Cat_Report";
     public static final String CLICK_CALL_A_VOLUNTEER_CAT = "click_Call_A_Volunteer_Cat";
+    public static final String CLICK_CAT_SHELTER_OVERVIEW = "click_Cat_Shelter_Overview";
+    public static final String CLICK_CAR_PASS_CAT = "click_Car_Pass_Cat";
+    public static final String CLICK_SAFETY_PRECAUTIONS_CAT = "click_Safety_Cat";
+    public static final String CLICK_VISIT_CAT = "click_Visit_Cat";
 
     /**
      * Текст под кнопками СОБАЧЬЕГО приюта- callbackQuery.data().
@@ -51,4 +65,14 @@ public class ConstantValue {
     public static final String CLICK_HOW_TO_ADOPT_A_DOG = "click_How_To_Adopt_A_Dog";
     public static final String CLICK_SEND_A_DOG_REPORT = "click_Send_A_Dog_Report";
     public static final String CLICK_CALL_A_VOLUNTEER_DOG = "click_Call_A_Volunteer_Dog";
+    public static final String CLICK_DOG_SHELTER_OVERVIEW = "click_Dog_Shelter_Overview";
+    public static final String CLICK_CAR_PASS_DOG = "click_Car_Pass_Dog";
+    public static final String CLICK_SAFETY_PRECAUTIONS_DOG = "click_Safety_Dog";
+    public static final String CLICK_VISIT_DOG = "click_Visit_Dog";
+
+    /**
+     * Постоянные кнопки.
+     */
+    public static final String BUTTON_MAIN_MENU = "Главное меню";
+    public static final String BUTTON_CALL_VOLUNTEER = "Позвать волонтера";
 }

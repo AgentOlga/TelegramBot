@@ -2,6 +2,7 @@ package com.example.telegrambot.services.impl;
 
 import com.example.telegrambot.listener.TelegramBotUpdatesListener;
 import com.example.telegrambot.services.InlineKeyboardMarkupService;
+import com.example.telegrambot.services.ReplyKeyboardMarkupService;
 import com.example.telegrambot.services.UserRequestService;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.CallbackQuery;
@@ -22,11 +23,13 @@ import static com.example.telegrambot.constants.ConstantValue.*;
 public class UserRequestServiceImpl implements UserRequestService {
 
     private final InlineKeyboardMarkupService inlineKeyboardMarkupService;
+    private final ReplyKeyboardMarkupService replyKeyboardMarkupService;
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
     private final TelegramBot telegramBot;
 
-    public UserRequestServiceImpl(InlineKeyboardMarkupService inlineKeyboardMarkupService, TelegramBot telegramBot) {
+    public UserRequestServiceImpl(InlineKeyboardMarkupService inlineKeyboardMarkupService, ReplyKeyboardMarkupService replyKeyboardMarkupService, TelegramBot telegramBot) {
         this.inlineKeyboardMarkupService = inlineKeyboardMarkupService;
+        this.replyKeyboardMarkupService = replyKeyboardMarkupService;
         this.telegramBot = telegramBot;
     }
 
@@ -38,7 +41,9 @@ public class UserRequestServiceImpl implements UserRequestService {
         String text = message.text();
         String userName;
 
-        if ("/start".equals(text)) {
+        getStart(chatId);
+
+        if ("/start".equals(text)||"Главное меню".equals(text)) {
 
             userName = update.message().from().username();
             SendMessage sendMessage =
@@ -61,12 +66,25 @@ public class UserRequestServiceImpl implements UserRequestService {
             switch (data) {
                 case CLICK_CAT_SHELTER:
 
-                    processCatShelterClick(chatId);
+                    getCatShelterClick(chatId);
+
                     break;
                 case CLICK_DOG_SHELTER:
 
-                    processDogShelterClick(chatId);
+                    getDogShelterClick(chatId);
+
                     break;
+                case CLICK_CAT_SHELTER_INFO:
+
+                    getCatShelterInfoClick(chatId);
+
+                    break;
+                case CLICK_DOG_SHELTER_INFO:
+
+                    getDogShelterInfoClick(chatId);
+
+                    break;
+
 
             }
         }
@@ -79,7 +97,7 @@ public class UserRequestServiceImpl implements UserRequestService {
         }
     }
 
-    private void processDogShelterClick(long chatId) {
+    private void getDogShelterClick(long chatId) {
         //shelterType = DOG;
         //saveGuest(chatId, shelterType);
 
@@ -89,12 +107,43 @@ public class UserRequestServiceImpl implements UserRequestService {
         sendMessage(sendMessage);
     }
 
-    private void processCatShelterClick(long chatId) {
+    private void getCatShelterClick(long chatId) {
 //        shelterType = PetType.CAT;
 //        saveUser(chatId, shelterType);
 
         SendMessage sendMessage = new SendMessage(chatId, GREETINGS_AT_THE_CAT_SHELTER);
         sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsCatShelter());
+
+        sendMessage(sendMessage);
+    }
+
+    private void getCatShelterInfoClick(long chatId) {
+
+        SendMessage sendMessage = new SendMessage(chatId, GREETINGS_AT_THE_SHELTER_INFO);
+        sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsCatShelterInfo());
+
+        sendMessage(sendMessage);
+
+    }
+
+    private void getDogShelterInfoClick(long chatId) {
+
+        SendMessage sendMessage = new SendMessage(chatId, GREETINGS_AT_THE_SHELTER_INFO);
+        sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsDogShelterInfo());
+
+        sendMessage(sendMessage);
+    }
+    private void getStart(long chatId) {
+
+        SendMessage sendMessage = new SendMessage(chatId, "");
+        sendMessage.replyMarkup(replyKeyboardMarkupService.createStart());
+
+        sendMessage(sendMessage);
+    }
+    private void getMenu(long chatId) {
+
+        SendMessage sendMessage = new SendMessage(chatId, "");
+        sendMessage.replyMarkup(replyKeyboardMarkupService.createStart());
 
         sendMessage(sendMessage);
     }
@@ -106,6 +155,7 @@ public class UserRequestServiceImpl implements UserRequestService {
             logger.error("Error during sending message: {}", sendResponse.description());
         }
     }
+
 
      /*private void saveUser(long chatId, PetType lastMenu) {
         User user = userRepository.findByChatId(chatId);

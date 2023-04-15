@@ -27,4 +27,18 @@ public interface InlineKeyboardMarkupService {
      * @return клавиатуру.
      */
     InlineKeyboardMarkup createButtonsDogShelter();
+
+    /**
+     * Создание кнопок для меню информации КОШАЧЬЕГО приюта.
+     *
+     * @return клавиатуру.
+     */
+    InlineKeyboardMarkup createButtonsCatShelterInfo();
+
+    /**
+     * Создание кнопок для меню информации СОБАЧЬЕГО приюта.
+     *
+     * @return клавиатуру.
+     */
+    InlineKeyboardMarkup createButtonsDogShelterInfo();
 }
