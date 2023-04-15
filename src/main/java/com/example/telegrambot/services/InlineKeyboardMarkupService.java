@@ -14,7 +14,6 @@ public interface InlineKeyboardMarkupService {
      */
     InlineKeyboardMarkup createButtonsShelterTypeSelect();
 
-
     /**
      * Создание кнопок для меню КОШАЧЬЕГО приюта.
      *

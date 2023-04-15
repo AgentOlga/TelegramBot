@@ -27,7 +27,9 @@ public class UserRequestServiceImpl implements UserRequestService {
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
     private final TelegramBot telegramBot;
 
-    public UserRequestServiceImpl(InlineKeyboardMarkupService inlineKeyboardMarkupService, ReplyKeyboardMarkupService replyKeyboardMarkupService, TelegramBot telegramBot) {
+    public UserRequestServiceImpl(InlineKeyboardMarkupService inlineKeyboardMarkupService,
+                                  ReplyKeyboardMarkupService replyKeyboardMarkupService,
+                                  TelegramBot telegramBot) {
         this.inlineKeyboardMarkupService = inlineKeyboardMarkupService;
         this.replyKeyboardMarkupService = replyKeyboardMarkupService;
         this.telegramBot = telegramBot;
@@ -39,26 +41,46 @@ public class UserRequestServiceImpl implements UserRequestService {
         Message message = update.message();
         Long chatId = message.from().id();
         String text = message.text();
-        String userName;
+        String userName = update.message().from().username();
 
         getStart(chatId);
 
         if ("/start".equals(text)) {
 
-            userName = update.message().from().username();
-            SendMessage sendMessage =
-                    new SendMessage(chatId, String.format(GREETINGS_AT_THE_PET_SHELTER, userName));
-
-            sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsShelterTypeSelect());
-            SendResponse sendResponse = telegramBot.execute(sendMessage);
-            if (!sendResponse.isOk()) {
-                logger.error("Error during sending message: {}", sendResponse.description());
+            if (userName == null) {
+                greetingNullName(chatId);
+            } else {
+                greetingUser(chatId, userName);
             }
         }
     }
 
+    private void greetingNullName(Long chatId) {
+
+        String name = "Пользователь";
+        SendMessage sendMessage =
+                new SendMessage(chatId, String.format(GREETINGS_AT_THE_PET_SHELTER, name));
+
+        sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsShelterTypeSelect());
+        SendResponse sendResponse = telegramBot.execute(sendMessage);
+        if (!sendResponse.isOk()) {
+            logger.error("Error during sending message: {}", sendResponse.description());
+        }
+    }
+    private void greetingUser(Long chatId, String name) {
+
+        SendMessage sendMessage =
+                new SendMessage(chatId, String.format(GREETINGS_AT_THE_PET_SHELTER, name));
+
+        sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsShelterTypeSelect());
+        SendResponse sendResponse = telegramBot.execute(sendMessage);
+        if (!sendResponse.isOk()) {
+            logger.error("Error during sending message: {}", sendResponse.description());
+        }
+    }
     @Override
     public void createButtonClick(Update update) {
+
         CallbackQuery callbackQuery = update.callbackQuery();
         if (callbackQuery != null) {
             long chatId = callbackQuery.message().chat().id();
@@ -246,6 +268,7 @@ public class UserRequestServiceImpl implements UserRequestService {
     }
 
     private void sendMessage(long chatId, String message) {
+
         SendMessage sendMessage = new SendMessage(chatId, message);
         SendResponse sendResponse = telegramBot.execute(sendMessage);
         if (!sendResponse.isOk()) {

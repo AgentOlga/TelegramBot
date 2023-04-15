@@ -25,12 +25,11 @@ import java.util.List;
 public class TelegramBotUpdatesListener implements UpdatesListener {
 
     private final UserRequestService userRequestService;
-
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
-
     private final TelegramBot telegramBot;
 
-    public TelegramBotUpdatesListener(UserRequestService userRequestService, TelegramBot telegramBot) {
+    public TelegramBotUpdatesListener(UserRequestService userRequestService,
+                                      TelegramBot telegramBot) {
         this.userRequestService = userRequestService;
         this.telegramBot = telegramBot;
     }
@@ -44,8 +43,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     public int process(List<Update> updates) {
         try {
 
-            updates
-                    .forEach(update -> {
+            updates.forEach(update -> {
                         logger.info("Handles update: {}", update);
 
                         if (update.message() != null) {
