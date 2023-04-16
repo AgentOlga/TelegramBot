@@ -57,7 +57,7 @@ public class UserRequestServiceImpl implements UserRequestService {
 
     private void greetingNullName(Long chatId) {
 
-        String name = "Пользователь";
+        String name = "";
         SendMessage sendMessage =
                 new SendMessage(chatId, String.format(GREETINGS_AT_THE_PET_SHELTER, name));
 
