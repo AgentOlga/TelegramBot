@@ -6,6 +6,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 public final class Bot  extends TelegramLongPollingBot {
     @Override
@@ -21,5 +22,16 @@ public final class Bot  extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         System.out.println(update.getMessage().getText());
+    }
+
+    public void sendText(Long who, String what){
+        SendMessage sm = SendMessage.builder()
+                .chatId(who.toString())
+                .text(what).build();
+        try {
+            execute(sm);
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
