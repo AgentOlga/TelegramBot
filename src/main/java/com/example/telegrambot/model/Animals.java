@@ -3,8 +3,7 @@ package com.example.telegrambot.model;
 import com.example.telegrambot.constants.animalsConst.Color;
 import com.example.telegrambot.constants.animalsConst.PetType;
 import com.example.telegrambot.constants.animalsConst.Sex;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.*;
 
 /**
  * Класс животный, в котором передает Id, имя животного, тип животного
@@ -14,7 +13,11 @@ import lombok.Data;
  */
 
 @Data
+@Getter
+@Setter
+@EqualsAndHashCode
 @AllArgsConstructor
+@NoArgsConstructor
 public class Animals {
 
     private long id;
