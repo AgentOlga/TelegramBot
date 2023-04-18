@@ -3,6 +3,7 @@ package com.example.telegrambot.model;
 import com.example.telegrambot.constants.animalsConst.Color;
 import com.example.telegrambot.constants.animalsConst.PetType;
 import com.example.telegrambot.constants.animalsConst.Sex;
+import jakarta.persistence.*;
 import lombok.*;
 
 /**
@@ -18,12 +19,25 @@ import lombok.*;
 @EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
+@Entity
+@Table(name = "animals")
 public class Animals {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private long id;
+
+    @Column(name = "nick_name")
     private String nickName;
+
+    @Column(name = "pet_type")
     private PetType petType;
+
+    @Column(name = "color")
     private Color color;
+
+    @Column(name = "sex")
     private Sex sex;
 
 }

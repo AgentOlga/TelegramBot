@@ -18,12 +18,17 @@ import java.util.Objects;
 @EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
-
 public class Volunteer {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private long id;
+
+    @Column(name = "chat_id")
     private long chatId;
+
+    @Column(name = "name")
     private String name;
 
 }

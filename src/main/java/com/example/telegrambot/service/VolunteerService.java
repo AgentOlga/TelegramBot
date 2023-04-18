@@ -8,7 +8,7 @@ import java.util.Collection;
 
 @Service
 public class VolunteerService {
-    private VolunteerRepository volunteerRepository;
+    private final VolunteerRepository volunteerRepository;
 
     public VolunteerService(VolunteerRepository volunteerRepository) {
         this.volunteerRepository = volunteerRepository;
