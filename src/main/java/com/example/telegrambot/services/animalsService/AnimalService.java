@@ -1,19 +1,14 @@
 package com.example.telegrambot.services.animalsService;
-
-import com.example.telegrambot.constants.animalsConst.Color;
-import com.example.telegrambot.constants.animalsConst.PetType;
-import com.example.telegrambot.constants.animalsConst.Sex;
+import com.example.telegrambot.model.Animals;
 import com.example.telegrambot.model.AnimalsShelter;
 import org.springframework.stereotype.Service;
+import java.util.Map;
 
 @Service
 public interface AnimalService {
     void addAnimal(AnimalsShelter animalsShelter);
 
-    int issuance(AnimalsShelter animalsShelter);
-
-    int getCount(PetType petType, Sex sex,
-                 Color color);
+    public Map<Animals, Integer> getAllAnimals();
 
     String deleteAnimal( AnimalsShelter animalsShelter);
 }

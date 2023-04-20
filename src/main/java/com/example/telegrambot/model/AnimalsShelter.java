@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * животные которые поступают в бота
+ * животные которые поступают в бота и количество животных
  */
 @Data
 @AllArgsConstructor

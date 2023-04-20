@@ -9,9 +9,7 @@ import java.util.Map;
 public interface AnimalsRepository {
     void save(AnimalsShelter animalsShelter);
 
-    int remove(AnimalsShelter animalsShelter);
-
-    String removeOne(AnimalsShelter animalsShelter);
+    String remove(AnimalsShelter animalsShelter);
 
     Map<Animals, Integer> getAll();
 }

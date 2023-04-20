@@ -1,7 +1,4 @@
 package com.example.telegrambot.controller.dto;
-import com.example.telegrambot.constants.animalsConst.Color;
-import com.example.telegrambot.constants.animalsConst.PetType;
-import com.example.telegrambot.constants.animalsConst.Sex;
 import com.example.telegrambot.model.Animals;
 import com.example.telegrambot.model.AnimalsShelter;
 import com.example.telegrambot.services.animalsService.AnimalService;
@@ -14,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/Animals")
@@ -30,10 +29,10 @@ private final AnimalService animalService;
     @Operation(
             summary = "сохранения животного в БД",
             responses = {
-   @ApiResponse(
-    responseCode = "200",
-    description = "животное сохранено",
-    content = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "животное сохранено",
+                            content = {
                                     @Content(
                                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                                             schema = @Schema(implementation = Animals.class)
@@ -51,10 +50,10 @@ private final AnimalService animalService;
         animalService.addAnimal(animalsShelter);
         return ResponseEntity.ok(new ResponseDTO("животное успешно сохранено"));
     }
-/*
-    *//**
-     * метод для получения списка животных
-     * @param petType
+
+    /**
+     * метод который выводит список животных
+     * @return
      */
     @Operation(
             summary = "Вывести список животных",
@@ -71,24 +70,18 @@ private final AnimalService animalService;
                     ),
                     @ApiResponse(
                             responseCode = "400",
-                            description = "Если нет животных"
+                            description = "Если животных нет в списке"
                     )
             }
     )
-    @GetMapping ("{id}")// получение списка животного в боте
-    public ResponseEntity<ResponseDTO> readAnimals(@RequestParam(value = "sex", required = false)
-                                                       Sex sex,
-                                                   @RequestParam(value = "petType", required = false)
-                                                       PetType petType,
-                                                   @RequestParam(value = "color", required = false)
-                                                   Color color) {
-        int countAnimals = animalService.getCount( petType, sex, color);
-        return ResponseEntity.ok(new ResponseDTO("количество животный" + countAnimals));
+    @GetMapping ("allAnimals")
+    public ResponseEntity<Map<Animals, Integer>> getAllAnimals() {
+        return ResponseEntity.ok(animalService.getAllAnimals());
     }
 
-
     /**
-     * метод удаления животного
+     * метод удаления животногог из списка
+     *
      * @param animalsShelter
      * @return
      */
@@ -111,9 +104,9 @@ private final AnimalService animalService;
                     )
             }
     )
-    @DeleteMapping ("{delete}")// удалить животного в боте
+    @DeleteMapping("{delete}")
     public ResponseEntity<ResponseDTO> deleteAnimals(@RequestBody AnimalsShelter animalsShelter) {
         String deleteAnimal = animalService.deleteAnimal(animalsShelter);
-        return ResponseEntity.ok(new ResponseDTO(animalsShelter.getAnimals().getNickName() + "удален(a) из БД"));
+        return ResponseEntity.ok(new ResponseDTO(deleteAnimal + " удален(a) из БД"));
     }
 }

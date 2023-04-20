@@ -1,5 +1,6 @@
 package com.example.telegrambot.repository;
 
+import com.example.telegrambot.exeption.ValidationAmimalExeption;
 import com.example.telegrambot.model.Animals;
 import com.example.telegrambot.model.AnimalsShelter;
 import org.springframework.stereotype.Repository;
@@ -28,49 +29,30 @@ public class AnimalsRepositoryImpl  implements AnimalsRepository{
 
     /**
      * метод удаления животного
-     *
      * @param animalsShelter
      * @return
      */
     @Override
-    public int remove(AnimalsShelter animalsShelter) {
+    public String remove(AnimalsShelter animalsShelter) {
+        String nickNameAnimal = animalsShelter.getAnimals().getNickName();
         Animals animals = animalsShelter.getAnimals();
         if (animalsMap.containsKey(animals)) {
-            int quantity = animalsMap.get(animals);
-
-            if (quantity > animalsShelter.getQuantity()) {
-                animalsMap.replace(animals,quantity - animalsShelter.getQuantity());
-                return animalsShelter.getQuantity();
-            } else {
-                animalsMap.remove(animals);
-                return quantity;
-            }
+            animalsMap.remove(animals);
+        } else {
+            throw new ValidationAmimalExeption("не возможно удалить животное");
         }
-        return 0;
+        return nickNameAnimal;
     }
-
     /**
-     * метод удаления животного, если он есть в БД
-     * @param animalsShelter
-     * @return
-     */
-    @Override
-    public String removeOne(AnimalsShelter animalsShelter) {
-        String s = "ytn";
-        Animals animals = animalsShelter.getAnimals();
-        if (animalsMap.containsKey(animals)) {
-            animalsMap.remove(animalsShelter);
-        }
-        return s;
-    }
-
-
-    /**
-     * метод который возращает всех животных
+     * метод который если список пустой то передает исключение
+     * иначе выводит весь список
      * @return
      */
     @Override
     public Map<Animals, Integer> getAll() {
+        if (animalsMap.isEmpty()) {
+            throw new ValidationAmimalExeption("животных нет в списке");
+        }
         return animalsMap;
     }
 }
