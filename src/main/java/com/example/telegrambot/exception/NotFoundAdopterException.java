@@ -6,6 +6,6 @@ package com.example.telegrambot.exception;
 public class NotFoundAdopterException extends RuntimeException{
 
     public NotFoundAdopterException(String message) {
-        super("Ошибка валидации!");
+        super("Усыновитель не найден в БД!");
     }
 }

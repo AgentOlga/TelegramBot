@@ -29,7 +29,7 @@ public class Adopter {
     private User user;
 
     @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "animals_id")
+    @JoinColumn(name = "animal_id")
     private Animals animals;
 
     @OneToOne(fetch = FetchType.EAGER)

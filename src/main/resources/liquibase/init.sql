@@ -32,9 +32,9 @@ CREATE TABLE animals
 CREATE TABLE adopters
 (
     id         BIGSERIAL PRIMARY KEY,
-    user_id    VARCHAR,
-    animal_id  VARCHAR NOT NULL,
-    shelter_id VARCHAR NOT NULL
+    user_id    BIGINT,
+    animal_id  BIGINT NOT NULL,
+    shelter_id BIGINT NOT NULL
 );
 
 -- changeset jrembo:4

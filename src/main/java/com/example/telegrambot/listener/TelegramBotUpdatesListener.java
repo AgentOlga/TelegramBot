@@ -11,7 +11,10 @@ import com.pengrad.telegrambot.model.Update;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 //import javax.annotation.PostConstruct;
 import java.util.List;
@@ -21,7 +24,7 @@ import java.util.List;
  * Он должен быть зарегистрирован источником событий
  * и реализовывать методы для получения и обработки уведомлений.
  */
-@Component
+@Service
 public class TelegramBotUpdatesListener implements UpdatesListener {
 
     private final UserRequestService userRequestService;

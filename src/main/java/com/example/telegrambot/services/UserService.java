@@ -1,5 +1,7 @@
 package com.example.telegrambot.services;
 
+import com.example.telegrambot.constants.UserStatus;
+import com.example.telegrambot.constants.UserType;
 import com.example.telegrambot.model.User;
 
 import java.util.Collection;
@@ -10,12 +12,63 @@ import java.util.Collection;
 public interface UserService {
 
     /**
-     * Создание пользователя
-     * @param userId идентификатор
-     * @param nickName ник пользователя
-     * @return созданный пользователь
+     * Создание пользователя бота
+     * @param userId идентификатор в телеграмме
+     * @param nickName ник в телеграмме
+     * @param userType тип пользователя
+     * @param userStatus статус пользователя
+     * @return созданный пользователь бота
      */
-    User addUser(long userId, String nickName);
+    User addUser(long userId,
+                 String nickName,
+                 UserType userType,
+                 UserStatus userStatus);
+
+    /**
+     * Создание гостя
+     * @param userId идентификатор в телеграмме
+     * @param nickName ник в телеграмме
+     * @param userType тип пользователя
+     * @param userStatus статус пользователя
+     * @param firstName имя гостя
+     * @param lastName фамилия гостя
+     * @param phoneNumber телефон гостя
+     * @param carNumber номер машины
+     * @return boolean
+     */
+    User addGuest(long userId,
+                  String nickName,
+                  UserType userType,
+                  UserStatus userStatus,
+                  String firstName,
+                  String lastName,
+                  String phoneNumber,
+                  String carNumber);
+
+    /**
+     * Создание усыновителя
+     * @param userId идентификатор в телеграмме
+     * @param nickName ник в телеграмме
+     * @param userType тип пользователя
+     * @param userStatus статус пользователя
+     * @param firstName имя усыновителя
+     * @param lastName фамилия усыновителя
+     * @param phoneNumber телефон усыновителя
+     * @param carNumber номер машины
+     * @param email эл.почта усыновителя
+     * @param address адрес усыновителя
+     * @return boolean
+     */
+    User addAdopterOrVolunteer(long userId,
+                               String nickName,
+                               UserType userType,
+                               UserStatus userStatus,
+                               String firstName,
+                               String lastName,
+                               String phoneNumber,
+                               String carNumber,
+                               String email,
+                               String address);
 
     /**
      * Сохраняем пользователя
@@ -23,21 +76,6 @@ public interface UserService {
      * @return сохраненный пользователь
      */
     User saveUser(User user);
-
-    /**
-     * Считаем количество обращений пользователя к боту
-     * @param user пользователь
-     * @return количество обращений
-     */
-    Integer countAppeal(User user);
-
-    /**
-     * Изменяем ник пользователя, если он поменялся у него
-     * @param userId идентификатор
-     * @param nickName новый ник пользователя
-     * @return пользователь с измененным ником
-     */
-    User editNickName(long userId, String nickName);
 
     /**
      * Выводим всех сохраненных пользователей

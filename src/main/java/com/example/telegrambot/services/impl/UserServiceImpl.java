@@ -1,5 +1,8 @@
 package com.example.telegrambot.services.impl;
 
+import com.example.telegrambot.constants.UserStatus;
+import com.example.telegrambot.constants.UserType;
+import com.example.telegrambot.exception.NotFoundUserException;
 import com.example.telegrambot.exception.ValidationException;
 import com.example.telegrambot.model.User;
 import com.example.telegrambot.repository.UserRepository;
@@ -25,19 +28,87 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User addUser(long userId, String nickName) {
+    public User addUser(long userId, String nickName, UserType userType, UserStatus userStatus) {
 
-        if (nickName == null) {
-            nickName = "Пользователь без ника";
-        }
-        User newUser = new User(userId, nickName);
-        if (userRepository.findAllByUserId(userId)) {
+        User newUser = new User(userId, nickName, userType, userStatus);
+        User user = userRepository.findByUserId(userId);
+        if (user == null) {
             saveUser(newUser);
             return newUser;
-        } else {
-            editNickName(userId, nickName);
-            return newUser;
         }
+        return user;
+    }
+
+    @Override
+    public User addGuest(long userId,
+                            String nickName,
+                            UserType userType,
+                            UserStatus userStatus,
+                            String firstName,
+                            String lastName,
+                            String phoneNumber,
+                            String carNumber) {
+
+        User newGuest = new User(userId,
+                nickName,
+                firstName,
+                lastName,
+                phoneNumber,
+                carNumber,
+                userType,
+                userStatus);
+        User user = userRepository.findByUserId(userId);
+        if (user == null) {
+            throw new NotFoundUserException(toString());
+        }
+        userRepository.updateUserInGuestById(userId,
+                firstName,
+                lastName,
+                phoneNumber,
+                carNumber,
+                userType,
+                userStatus);
+
+        return newGuest;
+    }
+
+    @Override
+    public User addAdopterOrVolunteer(long userId,
+                                      String nickName,
+                                      UserType userType,
+                                      UserStatus userStatus,
+                                      String firstName,
+                                      String lastName,
+                                      String phoneNumber,
+                                      String carNumber,
+                                      String email,
+                                      String address) {
+
+        User newAdopterOrVolunteer = new User(userId,
+                nickName,
+                firstName,
+                lastName,
+                phoneNumber,
+                carNumber,
+                address,
+                email,
+                userType,
+                userStatus);
+        User user = userRepository.findByUserId(userId);
+        if (user == null) {
+            throw new NotFoundUserException(toString());
+        }
+        userRepository.updateGuestInAdopterById(userId,
+                firstName,
+                lastName,
+                phoneNumber,
+                carNumber,
+                userType,
+                userStatus,
+                email,
+                address);
+
+        return newAdopterOrVolunteer;
     }
 
     @Override
@@ -49,17 +120,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Integer countAppeal(User user) {
-        return null;
-    }
-
-    @Override
-    public User editNickName(long userId, String nickName) {
-        return null;
-    }
-
-    @Override
     public Collection<User> getAllUser() {
-        return null;
+        return userRepository.findAll();
     }
 }

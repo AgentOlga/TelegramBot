@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Collection;
 
 @RestController
-@RequestMapping("pet-shelter/volunteer")
+@RequestMapping("/pet-shelter/volunteer")
 public class VolunteerController {
 
     private final VolunteerService volunteerService;

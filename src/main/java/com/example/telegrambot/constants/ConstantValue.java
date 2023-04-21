@@ -115,5 +115,9 @@ public class ConstantValue {
     public static final String CLICK_DOG_BIG = "CLICK_DOG_BIG";
     public static final String CLICK_DOG_INVALID = "CLICK_DOG_INVALID";
 
+    /**
+     * Значения в моделях.
+     */
+    public static final String DEFAULT_TELEGRAM_NICK = "Пользователь без ника";
 
 }

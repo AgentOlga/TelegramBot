@@ -5,6 +5,11 @@ import com.example.telegrambot.constants.UserType;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static com.example.telegrambot.constants.ConstantValue.*;
+
 /**
  * Сущность пользователей
  */
@@ -22,7 +27,7 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private int id;
+    private long id;
 
     @Column(name = "user_id")
     private long userId;
@@ -53,4 +58,144 @@ public class User {
 
     @Column(name = "user_status")
     private UserStatus userStatus;
+
+    //Конструктор для пользователя бота
+    public User(long userId,
+                String telegramNick,
+                UserType userType,
+                UserStatus userStatus) {
+        this.userId = userId;
+        setTelegramNick(telegramNick);
+        this.userType = userType;
+        this.userStatus = userStatus;
+    }
+
+    //Конструктор для гостя без машины
+    public User(long userId,
+                String telegramNick,
+                String firstName,
+                String lastName,
+                String phoneNumber,
+                UserType userType,
+                UserStatus userStatus) {
+        this.userId = userId;
+        setTelegramNick(telegramNick);
+        setFirstName(firstName);
+        setLastName(lastName);
+        setPhoneNumber(phoneNumber);
+        this.userType = userType;
+        this.userStatus = userStatus;
+    }
+
+    //Конструктор для гостя с машины
+
+    public User(long userId,
+                String telegramNick,
+                String firstName,
+                String lastName,
+                String phoneNumber,
+                String carNumber,
+                UserType userType,
+                UserStatus userStatus) {
+        this.userId = userId;
+        setTelegramNick(telegramNick);
+        setFirstName(firstName);
+        setLastName(lastName);
+        setCarNumber(carNumber);
+        setPhoneNumber(phoneNumber);
+        this.userType = userType;
+        this.userStatus = userStatus;
+    }
+
+    //Конструктор для усыновителя
+
+    public User(long userId,
+                String telegramNick,
+                String firstName,
+                String lastName,
+                String phoneNumber,
+                String carNumber,
+                String email,
+                String address,
+                UserType userType,
+                UserStatus userStatus) {
+        this.userId = userId;
+        setTelegramNick(telegramNick);
+        setFirstName(firstName);
+        setLastName(lastName);
+        setCarNumber(carNumber);
+        setPhoneNumber(phoneNumber);
+        setEmail(email);
+        this.address = address;
+        this.userType = userType;
+        this.userStatus = userStatus;
+    }
+
+    public void setTelegramNick(String telegramNick) {
+        if (telegramNick == null || telegramNick.isEmpty() || telegramNick.isBlank()) {
+            this.telegramNick = DEFAULT_TELEGRAM_NICK;
+        } else {
+            this.telegramNick = telegramNick;
+        }
+    }
+
+    public void setFirstName(String firstName) {
+
+        if (firstName.matches("^[a-zA-Zа-яА-Я]+$")
+                && Character.isUpperCase(firstName.charAt(0))) {
+            this.firstName = firstName;
+        } else {
+            throw new RuntimeException("Имя введено некорректно");
+        }
+    }
+
+    public void setLastName(String lastName) {
+        if (firstName.matches("^[a-zA-Zа-яА-Я]+$")
+                && Character.isUpperCase(firstName.charAt(0))) {
+            this.lastName = lastName;
+        } else {
+            throw new RuntimeException("Фамилия введена некорректно");
+        }
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+
+        phoneNumber = phoneNumber.replace("-", "");
+        phoneNumber = phoneNumber.replace(" ", "");
+        phoneNumber = phoneNumber.replace("+", "");
+
+        if (phoneNumber.length() == 10) {
+            this.phoneNumber = '7' + phoneNumber;
+        } else if (phoneNumber.length() > 11) {
+            throw new RuntimeException("Телефон слишком длинный");
+        } else if (phoneNumber.length() < 10) {
+            throw new RuntimeException("Телефон слишком короткий");
+        } else if (phoneNumber.length() == 11 && phoneNumber.charAt(0) != '7') {
+            throw new RuntimeException("Номер телефона не соответствует коду страны");
+        }
+    }
+
+    public void setCarNumber(String carNumber) {
+        if (carNumber == null) {
+            this.carNumber = "Без автомобиля";
+        } else {
+            this.carNumber = carNumber;
+        }
+    }
+
+    public void setEmail(String email) {
+
+        String correct = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+        Pattern pattern = Pattern.compile(correct);
+        Matcher matcher = pattern.matcher(email);
+        if (matcher.matches()) {
+            this.email = email;
+        } else {
+            throw new RuntimeException("Эл.почта введена некорректно");
+        }
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
 }
