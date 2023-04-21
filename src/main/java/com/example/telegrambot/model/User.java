@@ -1,5 +1,7 @@
 package com.example.telegrambot.model;
 
+import com.example.telegrambot.constants.UserStatus;
+import com.example.telegrambot.constants.UserType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,16 +22,35 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private long id;
+    private int id;
 
     @Column(name = "user_id")
     private long userId;
 
-    @Column(name = "nick_name")
-    private String nickName;
+    @Column(name = "telegram_nick")
+    private String telegramNick;
 
-    public User(long userId, String nickName) {
-        this.userId = userId;
-        this.nickName = nickName;
-    }
+    @Column(name = "first_name")
+    private String firstName;
+
+    @Column(name = "last_name")
+    private String lastName;
+
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
+    @Column(name = "car_number")
+    private String carNumber;
+
+    @Column(name = "email")
+    private String email;
+
+    @Column(name = "address")
+    private String address;
+
+    @Column(name = "user_type")
+    private UserType userType;
+
+    @Column(name = "user_status")
+    private UserStatus userStatus;
 }

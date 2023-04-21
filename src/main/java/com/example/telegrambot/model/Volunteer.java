@@ -10,17 +10,17 @@ import java.util.Objects;
 /**
  * волонтеры
  */
-@Entity
-@Table(name = "volunteers")
-@Data
+/*@Data
 @Getter
 @Setter
 @EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
+@Entity
+@Table(name = "volunteers")*/
 public class Volunteer {
 
-    @Id
+    /*@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private long id;
@@ -29,7 +29,7 @@ public class Volunteer {
     private long chatId;
 
     @Column(name = "name")
-    private String name;
+    private String name;*/
 
 }
 

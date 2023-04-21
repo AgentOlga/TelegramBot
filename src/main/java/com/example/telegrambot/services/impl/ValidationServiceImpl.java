@@ -1,9 +1,6 @@
 package com.example.telegrambot.services.impl;
 
-import com.example.telegrambot.model.Adopter;
-import com.example.telegrambot.model.Animals;
-import com.example.telegrambot.model.User;
-import com.example.telegrambot.model.Volunteer;
+import com.example.telegrambot.model.*;
 import com.example.telegrambot.services.ValidationService;
 import org.springframework.boot.jdbc.metadata.AbstractDataSourcePoolMetadata;
 import org.springframework.stereotype.Service;
@@ -18,11 +15,25 @@ public class ValidationServiceImpl implements ValidationService {
     public boolean validate(Object object) {
 
         if (object instanceof User) {
-            return ((User) object).getNickName() != null;
+            return ((User) object).getUserId() != 0
+                    && ((User) object).getUserType() != null
+                    && ((User) object).getUserStatus() != null
 
-        } else if (object instanceof Volunteer) {
-            return ((Volunteer) object).getName() != null
-                    && ((Volunteer) object).getChatId() != 0;
+                    || ((User) object).getUserId() != 0
+                    && ((User) object).getFirstName() != null
+                    && ((User) object).getLastName() != null
+                    && ((User) object).getPhoneNumber() != null
+                    && ((User) object).getUserType() != null
+                    && ((User) object).getUserStatus() != null
+
+                    ||((User) object).getUserId() != 0
+                    && ((User) object).getFirstName() != null
+                    && ((User) object).getLastName() != null
+                    && ((User) object).getAddress() != null
+                    && ((User) object).getEmail() != null
+                    && ((User) object).getPhoneNumber() != null
+                    && ((User) object).getUserType() != null
+                    && ((User) object).getUserStatus() != null;
 
         } else if (object instanceof Animals) {
             return ((Animals) object).getColor() != null
@@ -31,13 +42,17 @@ public class ValidationServiceImpl implements ValidationService {
                     && ((Animals) object).getSex() != null;
 
         } else if (object instanceof Adopter) {
-            return ((Adopter) object).getFirstName() != null
-                    && ((Adopter) object).getLastName() != null
-                    && ((Adopter) object).getAddress() != null
-                    && ((Adopter) object).getEmail() != null
-                    && ((Adopter) object).getPetType() != null
-                    && ((Adopter) object).getPhoneNumber() != null
-                    && ((Adopter) object).getStatus() != null;
+            return ((Adopter) object).getShelter() != null
+                    && ((Adopter) object).getAnimals() != null;
+
+        } else if (object instanceof Shelter) {
+            return ((Shelter) object).getAddressShelter() != null
+                    && ((Shelter) object).getTimeWork() != null
+                    && ((Shelter) object).getDrivingDirections() != null
+                    && ((Shelter) object).getPhoneShelter() != null
+                    && ((Shelter) object).getPhoneSecurity() != null
+                    && ((Shelter) object).getShelterType() != null;
+
         } else {
             return false;
         }

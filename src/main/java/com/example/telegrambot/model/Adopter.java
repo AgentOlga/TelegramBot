@@ -1,11 +1,10 @@
 package com.example.telegrambot.model;
 
-import com.example.telegrambot.constants.AdopterStatus;
+import com.example.telegrambot.constants.UserStatus;
+import com.example.telegrambot.constants.UserType;
 import com.example.telegrambot.constants.animalsConst.PetType;
 import jakarta.persistence.*;
 import lombok.*;
-
-import static com.example.telegrambot.constants.AdopterStatus.*;
 
 /**
  * Усыновители.
@@ -25,60 +24,16 @@ public class Adopter {
     @Column(name = "id")
     private long id;
 
-    @Column(name = "first_name")
-    private String firstName;
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id")
+    private User user;
 
-    @Column(name = "last_name")
-    private String lastName;
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "animals_id")
+    private Animals animals;
 
-    @Column(name = "phone_number")
-    private String phoneNumber;
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "shelter_id")
+    private Shelter shelter;
 
-    @Column(name = "car_number")
-    private String carNumber;
-
-    @Column(name = "email")
-    private String email;
-
-    @Column(name = "address")
-    private String address;
-
-    @Column(name = "pet_type")
-    private PetType petType;
-    @Column(name = "adopter_status")
-    private AdopterStatus status;
-
-    public Adopter(String firstName,
-                   String lastName,
-                   String phoneNumber,
-                   String carNumber,
-                   String email,
-                   String address,
-                   PetType petType,
-                   AdopterStatus status) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.phoneNumber = phoneNumber;
-        this.carNumber = carNumber;
-        this.email = email;
-        this.address = address;
-        this.petType = petType;
-        this.status = status;
-    }
-
-    public Adopter(String firstName,
-                   String lastName,
-                   String phoneNumber,
-                   String email,
-                   String address,
-                   PetType petType,
-                   AdopterStatus status) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.phoneNumber = phoneNumber;
-        this.email = email;
-        this.address = address;
-        this.petType = petType;
-        this.status = status;
-    }
 }

@@ -3,6 +3,7 @@ package com.example.telegrambot.controller;
 import com.example.telegrambot.model.Adopter;
 import com.example.telegrambot.services.AdopterService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
@@ -10,8 +11,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
 
+/**
+ * Контроллер усыновителя.
+ */
 @RestController
-@RequestMapping("pet-shelter/adopter")
+@RequestMapping("/pet-shelter/adopter")
 @Tag(name = "API по работе с усыновителями",
         description = "CRUD-операции для работы с усыновителями")
 public class AdopterController {
@@ -129,6 +133,32 @@ public class AdopterController {
 
         try {
             return ResponseEntity.ok(adopterService.getAllAdopter());
+        } catch (RuntimeException e) {
+            e.getStackTrace();
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
+    @GetMapping("{id}")
+    @Operation(
+            summary = "Поиск усыновителя по id"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Удалось получить усыновителя по id"
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Параметры запроса отсутствуют или имеют некорректный формат"
+    )
+    @ApiResponse(
+            responseCode = "500",
+            description = "Произошла ошибка, не зависящая от вызывающей стороны"
+    )
+    public ResponseEntity<Adopter> foundAdopterById(@Parameter(description = "id усыновителя") @PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(adopterService.foundAdopterById(id));
         } catch (RuntimeException e) {
             e.getStackTrace();
             return ResponseEntity.notFound().build();

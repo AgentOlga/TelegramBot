@@ -36,4 +36,11 @@ public interface AdopterService {
      * @return список усыновителей
      */
     Collection<Adopter> getAllAdopter();
+
+    /**
+     * Поиск усыновителя по id
+     * @param id идентификатор усыновителя
+     * @return найденный усыновитель
+     */
+    Adopter foundAdopterById(long id);
 }
