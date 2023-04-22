@@ -5,6 +5,16 @@ package com.example.telegrambot.constants;
  */
 public enum UserStatus {
 
-    APPROVE,
-    BLOCKED
+    APPROVE("Подтвержденный"),
+    BLOCKED("Заблокированный");
+
+    private final String translationStatus;
+
+    UserStatus(String translationStatus) {
+        this.translationStatus = translationStatus;
+    }
+
+    public String getTranslationColor() {
+        return translationStatus;
+    }
 }

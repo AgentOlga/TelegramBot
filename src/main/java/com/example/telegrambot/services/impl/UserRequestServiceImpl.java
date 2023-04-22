@@ -1,12 +1,16 @@
 package com.example.telegrambot.services.impl;
 
+import com.example.telegrambot.constants.ShelterType;
 import com.example.telegrambot.constants.UserStatus;
 import com.example.telegrambot.constants.UserType;
 import com.example.telegrambot.listener.TelegramBotUpdatesListener;
+import com.example.telegrambot.model.User;
+import com.example.telegrambot.repository.AdopterRepository;
 import com.example.telegrambot.repository.UserRepository;
 import com.example.telegrambot.services.InlineKeyboardMarkupService;
 import com.example.telegrambot.services.ReplyKeyboardMarkupService;
 import com.example.telegrambot.services.UserRequestService;
+import com.example.telegrambot.services.UserService;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.CallbackQuery;
 import com.pengrad.telegrambot.model.Message;
@@ -17,6 +21,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import static com.example.telegrambot.constants.ConstantValue.*;
 
 /**
@@ -25,20 +32,29 @@ import static com.example.telegrambot.constants.ConstantValue.*;
 @Service
 public class UserRequestServiceImpl implements UserRequestService {
 
+    private final Pattern patternName = Pattern
+            .compile("^[a-zA-Zа-яА-Я]+$");//ALT+Enter -> check
+    private final Pattern patternPhone = Pattern
+            .compile("(\\d{10})");//ALT+Enter -> check
+    private final Pattern patternCar = Pattern
+            .compile("^[a-zA-Z0-9]+$");//ALT+Enter -> check
     private final InlineKeyboardMarkupService inlineKeyboardMarkupService;
     private final ReplyKeyboardMarkupService replyKeyboardMarkupService;
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
     private final TelegramBot telegramBot;
-
+    private final UserService userService;
     private final UserRepository userRepository;
+    private final AdopterRepository adopterRepository;
 
     public UserRequestServiceImpl(InlineKeyboardMarkupService inlineKeyboardMarkupService,
                                   ReplyKeyboardMarkupService replyKeyboardMarkupService,
-                                  TelegramBot telegramBot, UserRepository userRepository) {
+                                  TelegramBot telegramBot, UserService userService, UserRepository userRepository, AdopterRepository adopterRepository) {
         this.inlineKeyboardMarkupService = inlineKeyboardMarkupService;
         this.replyKeyboardMarkupService = replyKeyboardMarkupService;
         this.telegramBot = telegramBot;
+        this.userService = userService;
         this.userRepository = userRepository;
+        this.adopterRepository = adopterRepository;
     }
 
     @Override
@@ -47,25 +63,124 @@ public class UserRequestServiceImpl implements UserRequestService {
         Message message = update.message();
         Long chatId = message.from().id();
         String text = message.text();
-        String userName = update.message().from().username();
-
-        getStart(chatId);
+        String userName = update.message().from().firstName();
+        long userId = update.message().from().id();
 
         if ("/start".equals(text)) {
 
-            if (userName == null) {
-                greetingNullName(chatId);
+            User user = userRepository.findByUserId(userId);
+
+            if (user == null) {
+                greetingNewUser(chatId, userName);
+                userService.addUser(userId, userName, UserType.DEFAULT, UserStatus.APPROVE);
+
+            } else if (user.getUserType()==UserType.DEFAULT && user.getUserStatus() == UserStatus.APPROVE){
+                greetingNotNewUser(chatId, userName);
+
+            } else if (user.getUserType()==UserType.GUEST && user.getUserStatus() == UserStatus.APPROVE){
+                greetingGuest(chatId, userName);
+
+            } else if (user.getUserType()==UserType.ADOPTER && user.getUserStatus() == UserStatus.APPROVE){
+                if (user.getShelterType() == ShelterType.CAT_SHELTER) {
+                    greetingAdopterCatShelter(chatId, userName);
+                } else if (user.getShelterType() == ShelterType.DOG_SHELTER){
+                    greetingAdopterDogShelter(chatId, userName);
+                }
+
+            } else if (user.getUserType() == UserType.VOLUNTEER && user.getUserStatus() == UserStatus.APPROVE) {
+                greetingVolunteer(chatId, userName);
+
             } else {
-                greetingUser(chatId, userName);
+                blockedUser(chatId, userName);
             }
+        }
+
+
+       /* switch (update.message().text()) {
+            case "/start":
+                if (userName == null) {
+                    greetingNullName(chatId);
+                    userService.addUser(userId, userName, UserType.DEFAULT, UserStatus.APPROVE);
+                } else {
+                    greetingUser(chatId, userName);
+                    userService.addUser(userId, userName, UserType.DEFAULT, UserStatus.APPROVE);
+                }
+                break;
+            case CLICK_VISIT_CAT:
+
+                updateUserInGuest(update, chatId);
+                break;
+
+
+
+
+
+
+            case CLICK_CALL_A_VOLUNTEER:
+                //callVolunteer(update);
+                break;
+            /*case BUTTON_CANCEL_SHARE_CONTACT_TEXT:
+                cancelShareContact(update);
+                break;
+        }*/
+    }
+
+    private void greetingVolunteer(long chatId, String name) {
+        /*SendMessage sendMessage =
+                new SendMessage(chatId, String.format(GREETING_VOLUNTEER, name));
+
+        sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsShelterTypeSelect());
+        SendResponse sendResponse = telegramBot.execute(sendMessage);
+        if (!sendResponse.isOk()) {
+            logger.error("Error during sending message: {}", sendResponse.description());
+        }*/
+    }
+    private void greetingGuest(long chatId, String name) {
+        SendMessage sendMessage =
+                new SendMessage(chatId, String.format(GREETING_GUEST, name));
+
+        sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsShelterTypeSelect());
+        SendResponse sendResponse = telegramBot.execute(sendMessage);
+        if (!sendResponse.isOk()) {
+            logger.error("Error during sending message: {}", sendResponse.description());
+        }
+    }
+    private void greetingAdopterDogShelter(long chatId, String name) {
+
+        SendMessage sendMessage =
+                new SendMessage(chatId, String.format(GREETING_ADOPTER_DOG_SHELTER, name));
+
+        sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsDogShelterReport());
+        SendResponse sendResponse = telegramBot.execute(sendMessage);
+        if (!sendResponse.isOk()) {
+            logger.error("Error during sending message: {}", sendResponse.description());
+        }
+    }
+    private void greetingAdopterCatShelter(long chatId, String name) {
+
+        SendMessage sendMessage =
+                new SendMessage(chatId, String.format(GREETING_ADOPTER_CAT_SHELTER, name));
+
+        sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsCatShelterReport());
+        SendResponse sendResponse = telegramBot.execute(sendMessage);
+        if (!sendResponse.isOk()) {
+            logger.error("Error during sending message: {}", sendResponse.description());
+        }
+    }
+    private void blockedUser(long chatId, String name) {
+        SendMessage sendMessage =
+                new SendMessage(chatId, String.format(NOT_GREETING_USER, name));
+
+        SendResponse sendResponse = telegramBot.execute(sendMessage);
+        if (!sendResponse.isOk()) {
+            logger.error("Error during sending message: {}", sendResponse.description());
         }
     }
 
-    private void greetingNullName(Long chatId) {
+    private void greetingNotNewUser(Long chatId, String name) {
 
-        String name = "";
         SendMessage sendMessage =
-                new SendMessage(chatId, String.format(GREETINGS_AT_THE_PET_SHELTER, name));
+                new SendMessage(chatId, String.format(GREETINGS_NOT_NEW_USER, name));
 
         sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsShelterTypeSelect());
         SendResponse sendResponse = telegramBot.execute(sendMessage);
@@ -74,7 +189,7 @@ public class UserRequestServiceImpl implements UserRequestService {
         }
     }
 
-    private void greetingUser(Long chatId, String name) {
+    private void greetingNewUser(Long chatId, String name) {
 
         SendMessage sendMessage =
                 new SendMessage(chatId, String.format(GREETINGS_AT_THE_PET_SHELTER, name));
@@ -156,12 +271,12 @@ public class UserRequestServiceImpl implements UserRequestService {
                     break;
                 case CLICK_VISIT_CAT:
 
-                    updateUserInGuest(update, chatId);
+                    updateUserInGuestCatShelter(update);
 
                     break;
                 case CLICK_VISIT_DOG:
 
-                    updateUserInGuest(update, chatId);
+                    //updateUserInGuestDogShelter(update);
 
                     break;
 
@@ -269,18 +384,19 @@ public class UserRequestServiceImpl implements UserRequestService {
         sendMessage(sendMessage);
     }
 
-    private void getStart(long chatId) {
+//    private void getStart(long chatId) {
+//
+//        SendMessage sendMessage = new SendMessage(chatId, "");
+//        sendMessage.replyMarkup(replyKeyboardMarkupService.createStart());
+//
+//        sendMessage(sendMessage);
+//    }
 
-        SendMessage sendMessage = new SendMessage(chatId, "");
-        sendMessage.replyMarkup(replyKeyboardMarkupService.createStart());
+    public void updateUserInGuestCatShelter(Update update) {
 
-        sendMessage(sendMessage);
-    }
-
-    private void updateUserInGuest(Update update, long chatId) {
 
         Message message = update.message();
-
+        Long chatId = message.from().id();
         String text = message.text();
 
         String firstName = null;
@@ -288,40 +404,38 @@ public class UserRequestServiceImpl implements UserRequestService {
         String phoneNumber = null;
         String carNumber = null;
 
-        SendMessage sendMessage = new SendMessage(chatId, "Чтобы записаться на посещение,\n" +
+        sendMessage(chatId, "Чтобы записаться на посещение,\n" +
                 "нужно заполнить анкету:\n" +
                 "Напишите Ваше имя");
 
         if (text != null) {
+            Matcher matcher = patternName.matcher(text);
+            if (matcher.find()) {
+                firstName = text;
 
-            if (text.equals(firstName.matches("^[a-zA-Zа-яА-Я]+$")
-                    && Character.isUpperCase(firstName.charAt(0)))) {
-
-                SendMessage sendMessage1 = new SendMessage(chatId,
+                sendMessage(chatId,
                         "Напишите Вашу фамилию");
 
                 if (text != null) {
-                    if (text.equals(lastName.matches("^[a-zA-Zа-яА-Я]+$")
-                            && Character.isUpperCase(firstName.charAt(0)))) {
+                    Matcher matcher1 = patternName.matcher(text);
+                    if (matcher1.find()) {
+                        lastName = text;
 
-                        SendMessage sendMessage2 = new SendMessage(chatId,
-                                "Напишите Ваш номер телефона");
+                        sendMessage(chatId,
+                                "Напишите Ваш номер телефона без кода страны в формате: XXXХХХХХХХ");
 
                         if (text != null) {
-                            phoneNumber = phoneNumber.replace("-", "");
-                            phoneNumber = phoneNumber.replace(" ", "");
-                            phoneNumber = phoneNumber.replace("+", "");
+                            Matcher matcher2 = patternPhone.matcher(text);
+                            if (matcher2.find()) {
+                                phoneNumber = '7' + text;
 
-                            if (text.equals(phoneNumber) && phoneNumber.length() == 10) {
-                                phoneNumber = '7' + phoneNumber;
-
-                                SendMessage sendMessage3 = new SendMessage(chatId,
+                                sendMessage(chatId,
                                         "Напишите номер Вашей машины.");
 
                                 if (text != null) {
-                                    if (text.equals(carNumber.matches("^[a-zA-Z0-9]+$"))
-                                    && carNumber.length() == 6) {
-
+                                    Matcher matcher3 = patternCar.matcher(text);
+                                    if (matcher3.find()) {
+                                        carNumber = text;
                                         long userId = update.message().from().id();
 
                                         userRepository.updateUserInGuestById(userId,
@@ -329,34 +443,32 @@ public class UserRequestServiceImpl implements UserRequestService {
                                                 lastName,
                                                 phoneNumber,
                                                 carNumber,
+                                                ShelterType.CAT_SHELTER,
                                                 UserType.GUEST,
                                                 UserStatus.APPROVE);
 
                                         sendMessage(chatId, "Анкета успешно заполнена!");
                                         getMainMenuClick(chatId);
-                                    }else if (phoneNumber.length() > 6) {
-                                        sendMessage(chatId, "номер слишком длинный");
-                                    } else if (phoneNumber.length() < 6) {
-                                        sendMessage(chatId, "номер слишком короткий");
+                                    } else {
+                                        sendMessage(chatId, "Номер введен некорректно!");
                                     }
+                                    //sendMessage(sendMessage3);
                                 }
 
-                            } else if (phoneNumber.length() > 11) {
-                                sendMessage(chatId, "Телефон слишком длинный");
-                            } else if (phoneNumber.length() < 10) {
-                                sendMessage(chatId, "Телефон слишком короткий");
-                            } else if (phoneNumber.length() == 11 && phoneNumber.charAt(0) != '7') {
-                                sendMessage(chatId, "Номер телефона не соответствует коду страны");
+                            } else {
+                                sendMessage(chatId, "Номер телефона введен некорректно!");
                             }
-
-                        } else {
-                            sendMessage(chatId, "Некорректный формат фамилии!");
+                            //sendMessage(sendMessage2);
                         }
+                    } else {
+                        sendMessage(chatId, "Некорректный формат фамилии!");
                     }
-                } else {
-                    sendMessage(chatId, "Некорректный формат имени!");
+                    //sendMessage(sendMessage1);
                 }
+            } else {
+                sendMessage(chatId, "Некорректный формат имени!");
             }
+            //sendMessage(sendMessage);
         }
     }
     /*Matcher matcher = pattern.matcher(text);
@@ -378,22 +490,22 @@ public class UserRequestServiceImpl implements UserRequestService {
         sendMessage(chatId, "Некорректный формат сообщения!");
     }*/
 
-            private void getMenu ( long chatId){
+    private void getMenu(long chatId) {
 
-                SendMessage sendMessage = new SendMessage(chatId, "");
-                sendMessage.replyMarkup(replyKeyboardMarkupService.createStart());
+        SendMessage sendMessage = new SendMessage(chatId, "");
+        sendMessage.replyMarkup(replyKeyboardMarkupService.createStart());
 
-                sendMessage(sendMessage);
-            }
+        sendMessage(sendMessage);
+    }
 
-            private void sendMessage ( long chatId, String message){
+    private void sendMessage(long chatId, String message) {
 
-                SendMessage sendMessage = new SendMessage(chatId, message);
-                SendResponse sendResponse = telegramBot.execute(sendMessage);
-                if (!sendResponse.isOk()) {
-                    logger.error("Error during sending message: {}", sendResponse.description());
-                }
-            }
+        SendMessage sendMessage = new SendMessage(chatId, message);
+        SendResponse sendResponse = telegramBot.execute(sendMessage);
+        if (!sendResponse.isOk()) {
+            logger.error("Error during sending message: {}", sendResponse.description());
+        }
+    }
 
 
      /*private void saveUser(long chatId, PetType lastMenu) {
@@ -403,4 +515,82 @@ public class UserRequestServiceImpl implements UserRequestService {
             guestRepository.save(guest);
         }
     }*/
+
+    /*public void updateUserInGuest(Update update, long chatId) {
+
+        Message message = update.message();
+
+        String text = message.text();
+
+        String firstName = null;
+        String lastName = null;
+        String phoneNumber = null;
+        String carNumber = null;
+
+        sendMessage(chatId, "Чтобы записаться на посещение,\n" +
+                "нужно заполнить анкету:\n" +
+                "Напишите Ваше имя");
+
+        if (text != null) {
+            Matcher matcher = patternName.matcher(text);
+            if (matcher.find()) {
+                firstName = text;
+
+                sendMessage(chatId,
+                        "Напишите Вашу фамилию");
+
+                if (text != null) {
+                    Matcher matcher1 = patternName.matcher(text);
+                    if (matcher1.find()) {
+                        lastName = text;
+
+                        sendMessage(chatId,
+                                "Напишите Ваш номер телефона без кода страны в формате: XXXХХХХХХХ");
+
+                        if (text != null) {
+                            Matcher matcher2 = patternPhone.matcher(text);
+                            if (matcher2.find()) {
+                                phoneNumber = '7' + text;
+
+                                sendMessage(chatId,
+                                        "Напишите номер Вашей машины.");
+
+                                if (text != null) {
+                                    Matcher matcher3 = patternCar.matcher(text);
+                                    if (matcher3.find()) {
+                                        carNumber = text;
+                                        long userId = update.message().from().id();
+
+                                        userRepository.updateUserInGuestById(userId,
+                                                firstName,
+                                                lastName,
+                                                phoneNumber,
+                                                carNumber,
+                                                UserType.GUEST,
+                                                UserStatus.APPROVE);
+
+                                        sendMessage(chatId, "Анкета успешно заполнена!");
+                                        getMainMenuClick(chatId);
+                                    } else {
+                                        sendMessage(chatId, "Номер введен некорректно!");
+                                    }
+                                    //sendMessage(sendMessage3);
+                                }
+
+                            } else {
+                                sendMessage(chatId, "Номер телефона введен некорректно!");
+                            }
+                            //sendMessage(sendMessage2);
+                        } else {
+                            sendMessage(chatId, "Некорректный формат фамилии!");
+                        }
+                    }
+                    //sendMessage(sendMessage1);
+                } else {
+                    sendMessage(chatId, "Некорректный формат имени!");
+                }
+            }
+            //sendMessage(sendMessage);
         }
+    }*/
+}

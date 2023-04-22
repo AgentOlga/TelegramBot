@@ -1,5 +1,6 @@
 package com.example.telegrambot.services;
 
+import com.example.telegrambot.constants.ShelterType;
 import com.example.telegrambot.constants.UserStatus;
 import com.example.telegrambot.constants.UserType;
 import com.example.telegrambot.model.User;
@@ -39,6 +40,7 @@ public interface UserService {
     User addGuest(long userId,
                   String nickName,
                   UserType userType,
+                  ShelterType shelterType,
                   UserStatus userStatus,
                   String firstName,
                   String lastName,
@@ -62,6 +64,7 @@ public interface UserService {
     User addAdopterOrVolunteer(long userId,
                                String nickName,
                                UserType userType,
+                               ShelterType shelterType,
                                UserStatus userStatus,
                                String firstName,
                                String lastName,

@@ -1,5 +1,6 @@
 package com.example.telegrambot.model;
 
+import com.example.telegrambot.constants.ShelterType;
 import com.example.telegrambot.constants.UserStatus;
 import com.example.telegrambot.constants.UserType;
 import jakarta.persistence.*;
@@ -53,6 +54,9 @@ public class User {
     @Column(name = "address")
     private String address;
 
+    @Column(name = "shelter_type")
+    private ShelterType shelterType;
+
     @Column(name = "user_type")
     private UserType userType;
 
@@ -76,6 +80,7 @@ public class User {
                 String firstName,
                 String lastName,
                 String phoneNumber,
+                ShelterType shelterType,
                 UserType userType,
                 UserStatus userStatus) {
         this.userId = userId;
@@ -83,6 +88,7 @@ public class User {
         setFirstName(firstName);
         setLastName(lastName);
         setPhoneNumber(phoneNumber);
+        this.shelterType = shelterType;
         this.userType = userType;
         this.userStatus = userStatus;
     }
@@ -95,6 +101,7 @@ public class User {
                 String lastName,
                 String phoneNumber,
                 String carNumber,
+                ShelterType shelterType,
                 UserType userType,
                 UserStatus userStatus) {
         this.userId = userId;
@@ -103,6 +110,7 @@ public class User {
         setLastName(lastName);
         setCarNumber(carNumber);
         setPhoneNumber(phoneNumber);
+        this.shelterType = shelterType;
         this.userType = userType;
         this.userStatus = userStatus;
     }
@@ -117,6 +125,7 @@ public class User {
                 String carNumber,
                 String email,
                 String address,
+                ShelterType shelterType,
                 UserType userType,
                 UserStatus userStatus) {
         this.userId = userId;
@@ -127,6 +136,7 @@ public class User {
         setPhoneNumber(phoneNumber);
         setEmail(email);
         this.address = address;
+        this.shelterType = shelterType;
         this.userType = userType;
         this.userStatus = userStatus;
     }
@@ -176,7 +186,7 @@ public class User {
     }
 
     public void setCarNumber(String carNumber) {
-        if (carNumber == null) {
+        if (carNumber == null || carNumber.isEmpty() || carNumber.isBlank()) {
             this.carNumber = "Без автомобиля";
         } else {
             this.carNumber = carNumber;

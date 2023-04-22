@@ -2,18 +2,17 @@ package com.example.telegrambot.listener;
 
 
 import com.example.telegrambot.services.UserRequestService;
+import com.example.telegrambot.services.impl.UserRequestServiceImpl;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 
+import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
 
 
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 //import javax.annotation.PostConstruct;
@@ -30,11 +29,13 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     private final UserRequestService userRequestService;
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
     private final TelegramBot telegramBot;
+    private final UserRequestServiceImpl userRequestServiceImpl;
 
     public TelegramBotUpdatesListener(UserRequestService userRequestService,
-                                      TelegramBot telegramBot) {
+                                      TelegramBot telegramBot, UserRequestServiceImpl userRequestServiceImpl) {
         this.userRequestService = userRequestService;
         this.telegramBot = telegramBot;
+        this.userRequestServiceImpl = userRequestServiceImpl;
     }
 
     @PostConstruct
@@ -49,11 +50,13 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             updates.forEach(update -> {
                         logger.info("Handles update: {}", update);
 
-                        if (update.message() != null) {
-                            userRequestService.sendMessageStart(update);
-                        } else {
-                            userRequestService.createButtonClick(update);
-                        }
+                if (update.message() != null) {
+                    userRequestService.sendMessageStart(update);
+
+                } else {
+
+                    userRequestService.createButtonClick(update);
+                }
 
                     });
         } catch (Exception e) {

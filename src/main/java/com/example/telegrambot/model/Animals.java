@@ -40,4 +40,10 @@ public class Animals {
     @Column(name = "sex")
     private Sex sex;
 
+    public Animals(String nickName, PetType petType, Color color, Sex sex) {
+        this.nickName = nickName;
+        this.petType = petType;
+        this.color = color;
+        this.sex = sex;
+    }
 }

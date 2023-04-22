@@ -1,5 +1,6 @@
 package com.example.telegrambot.controller;
 
+import com.example.telegrambot.constants.ShelterType;
 import com.example.telegrambot.constants.UserStatus;
 import com.example.telegrambot.constants.UserType;
 import com.example.telegrambot.model.Adopter;
@@ -7,6 +8,7 @@ import com.example.telegrambot.model.User;
 import com.example.telegrambot.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +18,9 @@ import java.util.Collection;
  * Контроллер пользователей.
  */
 @RestController
-@RequestMapping("/pet-shelter/user")
+@RequestMapping("/pet-shelter")
+@Tag(name = "API по работе с пользователями",
+        description = "CRUD-операции для работы с пользователями")
 public class UserController {
 
     private final UserService userService;
@@ -25,7 +29,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping
+    @PostMapping("/user")
     @Operation(
             summary = "Регистрация пользователя бота",
             description = "Нужно написать данные пользователя " +
@@ -59,7 +63,7 @@ public class UserController {
         }
     }
 
-    @PostMapping
+    @PostMapping("/guest")
     @Operation(
             summary = "Регистрация гостя",
             description = "Нужно написать данные гостя " +
@@ -79,18 +83,20 @@ public class UserController {
             description = "Произошла ошибка, не зависящая от вызывающей стороны"
     )
     public ResponseEntity<User> addNewGuest(@RequestParam(required = false) Long userId,
-                                           @RequestParam(required = false) String telegramNick,
-                                           @RequestParam(required = false) String firstName,
-                                           @RequestParam(required = false) String lastName,
-                                           @RequestParam(required = false) String phoneNumber,
-                                           @RequestParam(required = false) String carNumber,
+                                            @RequestParam(required = false) String telegramNick,
+                                            @RequestParam(required = false) String firstName,
+                                            @RequestParam(required = false) String lastName,
+                                            @RequestParam(required = false) String phoneNumber,
+                                            @RequestParam(required = false) String carNumber,
+                                            @RequestParam(required = false) ShelterType shelterType,
                                             @RequestParam(required = false) UserType userType,
-                                           @RequestParam(required = false) UserStatus userStatus) {
+                                            @RequestParam(required = false) UserStatus userStatus) {
 
         try {
             return ResponseEntity.ok(userService.addGuest(userId,
                     telegramNick,
                     userType,
+                    shelterType,
                     userStatus,
                     firstName,
                     lastName,
@@ -102,7 +108,7 @@ public class UserController {
         }
     }
 
-    @PostMapping
+    @PostMapping("/adopter_volunteer")
     @Operation(
             summary = "Регистрация усыновителя/волонтера",
             description = "Нужно написать данные усыновителя/волонтера " +
@@ -123,20 +129,22 @@ public class UserController {
             description = "Произошла ошибка, не зависящая от вызывающей стороны"
     )
     public ResponseEntity<User> addNewAdopterOrVolunteer(@RequestParam(required = false) Long userId,
-                                            @RequestParam(required = false) String telegramNick,
-                                            @RequestParam(required = false) String firstName,
-                                            @RequestParam(required = false) String lastName,
-                                            @RequestParam(required = false) String phoneNumber,
-                                            @RequestParam(required = false) String carNumber,
-                                            @RequestParam(required = false) String address,
-                                            @RequestParam(required = false) String email,
-                                            @RequestParam(required = false) UserType userType,
-                                            @RequestParam(required = false) UserStatus userStatus) {
+                                                         @RequestParam(required = false) String telegramNick,
+                                                         @RequestParam(required = false) String firstName,
+                                                         @RequestParam(required = false) String lastName,
+                                                         @RequestParam(required = false) String phoneNumber,
+                                                         @RequestParam(required = false) String carNumber,
+                                                         @RequestParam(required = false) String address,
+                                                         @RequestParam(required = false) String email,
+                                                         @RequestParam(required = false) ShelterType shelterType,
+                                                         @RequestParam(required = false) UserType userType,
+                                                         @RequestParam(required = false) UserStatus userStatus) {
 
         try {
             return ResponseEntity.ok(userService.addAdopterOrVolunteer(userId,
                     telegramNick,
                     userType,
+                    shelterType,
                     userStatus,
                     firstName,
                     lastName,

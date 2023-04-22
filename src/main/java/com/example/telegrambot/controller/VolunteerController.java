@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
 
-@RestController
-@RequestMapping("/pet-shelter/volunteer")
+//@RestController
+//@RequestMapping("/pet-shelter/volunteer")
 public class VolunteerController {
 
-    private final VolunteerService volunteerService;
+    /*private final VolunteerService volunteerService;
 
     public VolunteerController(VolunteerService volunteerService) {
         this.volunteerService = volunteerService;
@@ -79,6 +79,6 @@ public class VolunteerController {
     @GetMapping("all_volunteer")
     public ResponseEntity<Collection<Volunteer>> getAllVolunteer(){
         return ResponseEntity.ok(volunteerService.getAllVolunteer());
-    }
+    }*/
 
 }

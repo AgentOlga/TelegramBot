@@ -1,5 +1,6 @@
 package com.example.telegrambot.repository;
 
+import com.example.telegrambot.constants.ShelterType;
 import com.example.telegrambot.constants.UserStatus;
 import com.example.telegrambot.constants.UserType;
 import com.example.telegrambot.model.User;
@@ -18,7 +19,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @param userId идентификатор в телеграмм
      * @return найденный пользователь
      */
-    @Modifying
+    //@Modifying
     @Query("SELECT u FROM User u WHERE u.userId = :user_id")
     User findByUserId(@Param("user_id") long userId);
 
@@ -32,11 +33,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @param userType тип пользователя
      * @param userStatus статус пользователя
      */
-    @Modifying
+    //@Modifying
     @Query("UPDATE User u SET u.firstName = :first_name, " +
             "u.lastName = :last_name," +
             "u.phoneNumber = :phone_number," +
             "u.carNumber = :car_number," +
+            "u.shelterType = :shelter_type," +
             "u.userType = :user_type," +
             "u.userStatus = :user_status" +
             " where u.userId = :user_id")
@@ -45,6 +47,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
                                @Param("last_name") String lastName,
                                @Param("phone_number") String phoneNumber,
                                @Param("car_number") String carNumber,
+                               @Param("shelter_type") ShelterType shelterType,
                                @Param("user_type") UserType userType,
                                @Param("user_status") UserStatus userStatus);
 
@@ -60,11 +63,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @param email эл.почта усыновителя/волонтера
      * @param address адрес усыновителя/волонтера
      */
-    @Modifying
+    //@Modifying
     @Query("UPDATE User u SET u.firstName = :first_name, " +
             "u.lastName = :last_name," +
             "u.phoneNumber = :phone_number," +
             "u.carNumber = :car_number," +
+            "u.shelterType = :shelter_type," +
             "u.userType = :user_type," +
             "u.userStatus = :user_status," +
             "u.email = :email," +
@@ -75,6 +79,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
                                   @Param("last_name") String lastName,
                                   @Param("phone_number") String phoneNumber,
                                   @Param("car_number") String carNumber,
+                                  @Param("shelter_type") ShelterType shelterType,
                                   @Param("user_type") UserType userType,
                                   @Param("user_status") UserStatus userStatus,
                                   @Param("email") String email,

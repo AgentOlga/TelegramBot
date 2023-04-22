@@ -11,6 +11,24 @@ public class ConstantValue {
     public static final String GREETINGS_AT_THE_PET_SHELTER = "Здравствуйте, %s!\n" +
             "Добро пожаловать в чат приюта домашних животных города Астаны!\n" +
             ConstantValue.GREETINGS_MAIN_MENU;
+    public static final String GREETINGS_NOT_NEW_USER = "Здравствуйте, %s!\n" +
+            "Рады видеть Вас снова!\n" +
+            ConstantValue.GREETINGS_MAIN_MENU;
+    public static final String GREETING_GUEST = "Здравствуйте, %s!\n" +
+            "Вы записались на посещение приюта, дождитесь ответа от волонтера!\n" +
+            ConstantValue.GREETINGS_MAIN_MENU;
+    public static final String GREETING_ADOPTER_CAT_SHELTER = "Здравствуйте, %s!\n" +
+            "Поздравляем, Вы стали усыновителем питомца нашего приюта!\n" +
+            "Чтобы пройти испытательный срок, Вы должны соблюдать правила" +
+            "и вовремя отправлять отчеты! Желаем удачи!\n" +
+            ConstantValue.GREETINGS_AT_THE_CAT_SHELTER;
+    public static final String GREETING_ADOPTER_DOG_SHELTER = "Здравствуйте, %s!\n" +
+            "Поздравляем, Вы стали усыновителем питомца нашего приюта!\n" +
+            "Чтобы пройти испытательный срок, Вы должны соблюдать правила" +
+            "и вовремя отправлять отчеты! Желаем удачи!\n" +
+            ConstantValue.GREETINGS_AT_THE_DOG_SHELTER;
+    public static final String NOT_GREETING_USER = "Здравствуйте, %s!\n" +
+            "Вам отказано в доступе!";
     public static final String GREETINGS_MAIN_MENU =
             "Выберете, пожалуйста, приют, из которого хотите забрать питомца!";
     public static final String GREETINGS_AT_THE_CAT_SHELTER = "Вы выбрали приют для кошек!\n" +

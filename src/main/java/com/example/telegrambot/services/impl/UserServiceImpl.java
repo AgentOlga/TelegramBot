@@ -1,5 +1,6 @@
 package com.example.telegrambot.services.impl;
 
+import com.example.telegrambot.constants.ShelterType;
 import com.example.telegrambot.constants.UserStatus;
 import com.example.telegrambot.constants.UserType;
 import com.example.telegrambot.exception.NotFoundUserException;
@@ -43,6 +44,7 @@ public class UserServiceImpl implements UserService {
     public User addGuest(long userId,
                             String nickName,
                             UserType userType,
+                            ShelterType shelterType,
                             UserStatus userStatus,
                             String firstName,
                             String lastName,
@@ -55,6 +57,7 @@ public class UserServiceImpl implements UserService {
                 lastName,
                 phoneNumber,
                 carNumber,
+                shelterType,
                 userType,
                 userStatus);
         User user = userRepository.findByUserId(userId);
@@ -66,6 +69,7 @@ public class UserServiceImpl implements UserService {
                 lastName,
                 phoneNumber,
                 carNumber,
+                shelterType,
                 userType,
                 userStatus);
 
@@ -76,6 +80,7 @@ public class UserServiceImpl implements UserService {
     public User addAdopterOrVolunteer(long userId,
                                       String nickName,
                                       UserType userType,
+                                      ShelterType shelterType,
                                       UserStatus userStatus,
                                       String firstName,
                                       String lastName,
@@ -92,6 +97,7 @@ public class UserServiceImpl implements UserService {
                 carNumber,
                 address,
                 email,
+                shelterType,
                 userType,
                 userStatus);
         User user = userRepository.findByUserId(userId);
@@ -103,6 +109,7 @@ public class UserServiceImpl implements UserService {
                 lastName,
                 phoneNumber,
                 carNumber,
+                shelterType,
                 userType,
                 userStatus,
                 email,
