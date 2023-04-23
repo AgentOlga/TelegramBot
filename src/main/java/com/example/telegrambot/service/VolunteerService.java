@@ -6,9 +6,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 
-@Service
+//@Service
 public class VolunteerService {
-    private VolunteerRepository volunteerRepository;
+   /* private final VolunteerRepository volunteerRepository;
 
     public VolunteerService(VolunteerRepository volunteerRepository) {
         this.volunteerRepository = volunteerRepository;
@@ -20,7 +20,7 @@ public class VolunteerService {
      * @param volunteer
      * @return Volunteer
      */
-    public Volunteer addVolunteer(Volunteer volunteer){
+   /* public Volunteer addVolunteer(Volunteer volunteer){
         return volunteerRepository.save(volunteer);
     }
 
@@ -29,7 +29,7 @@ public class VolunteerService {
      *
      * @return Collection
      */
-    public Collection<Volunteer> getAllVolunteer(){
+    /*public Collection<Volunteer> getAllVolunteer(){
         return volunteerRepository.findAll();
-    }
+    }*/
 }
