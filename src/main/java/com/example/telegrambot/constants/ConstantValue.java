@@ -27,14 +27,17 @@ public class ConstantValue {
             "Чтобы пройти испытательный срок, Вы должны соблюдать правила" +
             "и вовремя отправлять отчеты! Желаем удачи!\n" +
             ConstantValue.GREETINGS_AT_THE_DOG_SHELTER;
+    public static final String GREETING_VOLUNTEER = "Здравствуйте, %s!\n" +
+            "Вы зашли в меню волонтеров!\n" +
+            ConstantValue.GREETINGS_AT_THE_SHELTER_INFO;
     public static final String NOT_GREETING_USER = "Здравствуйте, %s!\n" +
             "Вам отказано в доступе!";
     public static final String GREETINGS_MAIN_MENU =
             "Выберете, пожалуйста, приют, из которого хотите забрать питомца!";
     public static final String GREETINGS_AT_THE_CAT_SHELTER = "Вы выбрали приют для кошек!\n" +
-            "Выберете, пожалуйста, вариант из предложенного меню!";
+            ConstantValue.GREETINGS_AT_THE_SHELTER_INFO;;
     public static final String GREETINGS_AT_THE_DOG_SHELTER = "Вы выбрали приют для собак!\n" +
-            "Выберете, пожалуйста, вариант из предложенного меню!";
+            ConstantValue.GREETINGS_AT_THE_SHELTER_INFO;
     public static final String GREETINGS_AT_THE_SHELTER_INFO =
             "Выберете, пожалуйста, вариант из предложенного меню!";
 
@@ -138,4 +141,15 @@ public class ConstantValue {
      */
     public static final String DEFAULT_TELEGRAM_NICK = "Пользователь без ника";
 
+    /**
+     * Кнопки для волонтеров.
+     */
+    public static final String BUTTON_CHECK_REPORT = "Проверить отчет";
+    public static final String BUTTON_FREE_MESSAGE = "Свободное сообщение";
+
+    /**
+     * Текст под кнопками ВОЛОНТЕРОВ- callbackQuery.data().
+     */
+    public static final String CLICK_CHECK_REPORT = "CLICK_CHECK_REPORT";
+    public static final String CLICK_FREE_MESSAGE = "CLICK_FREE_MESSAGE";
 }
