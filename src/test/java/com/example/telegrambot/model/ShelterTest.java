@@ -4,6 +4,8 @@ import com.example.telegrambot.constants.ConstantValue;
 import com.example.telegrambot.constants.ShelterType;
 import com.example.telegrambot.constants.UserStatus;
 import com.example.telegrambot.constants.UserType;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,16 +20,37 @@ class ShelterTest {
     private static final String EMPTY_VALUE = "";
     private static final String BLANK_VALUE = " ";
     private Shelter shelter;
+    private Shelter shelterCorrect;
 
+    @BeforeEach
+    public void initTest() {
+        shelterCorrect = new Shelter(CORRECT_ADDRESS,
+                CORRECT_TIME_WORK,
+                CORRECT_DRIVING,
+                CORRECT_PHONE_NUMBER,
+                CORRECT_PHONE_NUMBER,
+                CORRECT_SHELTER_TYPE);
 
-    @Test
-    public void shouldAddShelterWithParameters() {
         shelter = new Shelter(CORRECT_ADDRESS,
                 CORRECT_TIME_WORK,
                 CORRECT_DRIVING,
                 CORRECT_PHONE_NUMBER,
                 CORRECT_PHONE_NUMBER,
                 CORRECT_SHELTER_TYPE);
+
+    }
+    @AfterEach
+    public void afterTest() {
+        System.out.println("Testing is finished!");
+    }
+
+    @Test
+    public void checkingForIncomingCorrectDataFromTheMethodAddShelter() {
+        assertEquals(shelterCorrect, shelter);
+    }
+
+    @Test
+    public void shouldAddShelterWithParameters() {
 
         assertNotNull(shelter.getAddressShelter());
         assertNotNull(shelter.getTimeWork());
@@ -47,6 +70,11 @@ class ShelterTest {
                         BLANK_VALUE,
                         BLANK_VALUE,
                         CORRECT_SHELTER_TYPE));
+
+    }
+
+    @Test
+    public void shouldAddGuestParametersWithIsEmpty() {
 
         assertThrows(RuntimeException.class,
                 () -> new Shelter(EMPTY_VALUE,

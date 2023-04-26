@@ -12,15 +12,20 @@ import com.example.telegrambot.services.ReplyKeyboardMarkupService;
 import com.example.telegrambot.services.UserRequestService;
 import com.example.telegrambot.services.UserService;
 import com.pengrad.telegrambot.TelegramBot;
+import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.CallbackQuery;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.model.request.KeyboardButton;
+import com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,7 +34,7 @@ import static com.example.telegrambot.constants.ConstantValue.*;
 /**
  * Бизнес-логика по работе запросов от пользователей.
  */
-@Service
+@Component
 public class UserRequestServiceImpl implements UserRequestService {
 
     private final Pattern patternName = Pattern
@@ -38,6 +43,8 @@ public class UserRequestServiceImpl implements UserRequestService {
             .compile("(\\d{10})");//ALT+Enter -> check
     private final Pattern patternCar = Pattern
             .compile("^[a-zA-Z0-9]+$");//ALT+Enter -> check
+    private final Pattern pattern = Pattern
+            .compile("(^[А-я]+)\\s+([А-я]+)\\s+(\\d{10})\\s+([А-я0-9\\d]+$)");//ALT+Enter -> check
     private final InlineKeyboardMarkupService inlineKeyboardMarkupService;
     private final ReplyKeyboardMarkupService replyKeyboardMarkupService;
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
@@ -48,7 +55,10 @@ public class UserRequestServiceImpl implements UserRequestService {
 
     public UserRequestServiceImpl(InlineKeyboardMarkupService inlineKeyboardMarkupService,
                                   ReplyKeyboardMarkupService replyKeyboardMarkupService,
-                                  TelegramBot telegramBot, UserService userService, UserRepository userRepository, AdopterRepository adopterRepository) {
+                                  TelegramBot telegramBot,
+                                  UserService userService,
+                                  UserRepository userRepository,
+                                  AdopterRepository adopterRepository) {
         this.inlineKeyboardMarkupService = inlineKeyboardMarkupService;
         this.replyKeyboardMarkupService = replyKeyboardMarkupService;
         this.telegramBot = telegramBot;
@@ -74,16 +84,16 @@ public class UserRequestServiceImpl implements UserRequestService {
                 greetingNewUser(chatId, userName);
                 userService.addUser(userId, userName, UserType.DEFAULT, UserStatus.APPROVE);
 
-            } else if (user.getUserType()==UserType.DEFAULT && user.getUserStatus() == UserStatus.APPROVE){
+            } else if (user.getUserType() == UserType.DEFAULT && user.getUserStatus() == UserStatus.APPROVE) {
                 greetingNotNewUser(chatId, userName);
 
-            } else if (user.getUserType()==UserType.GUEST && user.getUserStatus() == UserStatus.APPROVE){
+            } else if (user.getUserType() == UserType.GUEST && user.getUserStatus() == UserStatus.APPROVE) {
                 greetingGuest(chatId, userName);
 
-            } else if (user.getUserType()==UserType.ADOPTER && user.getUserStatus() == UserStatus.APPROVE){
+            } else if (user.getUserType() == UserType.ADOPTER && user.getUserStatus() == UserStatus.APPROVE) {
                 if (user.getShelterType() == ShelterType.CAT_SHELTER) {
                     greetingAdopterCatShelter(chatId, userName);
-                } else if (user.getShelterType() == ShelterType.DOG_SHELTER){
+                } else if (user.getShelterType() == ShelterType.DOG_SHELTER) {
                     greetingAdopterDogShelter(chatId, userName);
                 }
 
@@ -94,35 +104,6 @@ public class UserRequestServiceImpl implements UserRequestService {
                 blockedUser(chatId, userName);
             }
         }
-
-
-       /* switch (update.message().text()) {
-            case "/start":
-                if (userName == null) {
-                    greetingNullName(chatId);
-                    userService.addUser(userId, userName, UserType.DEFAULT, UserStatus.APPROVE);
-                } else {
-                    greetingUser(chatId, userName);
-                    userService.addUser(userId, userName, UserType.DEFAULT, UserStatus.APPROVE);
-                }
-                break;
-            case CLICK_VISIT_CAT:
-
-                updateUserInGuest(update, chatId);
-                break;
-
-
-
-
-
-
-            case CLICK_CALL_A_VOLUNTEER:
-                //callVolunteer(update);
-                break;
-            /*case BUTTON_CANCEL_SHARE_CONTACT_TEXT:
-                cancelShareContact(update);
-                break;
-        }*/
     }
 
     private void greetingVolunteer(long chatId, String name) {
@@ -135,6 +116,7 @@ public class UserRequestServiceImpl implements UserRequestService {
             logger.error("Error during sending message: {}", sendResponse.description());
         }*/
     }
+
     private void greetingGuest(long chatId, String name) {
         SendMessage sendMessage =
                 new SendMessage(chatId, String.format(GREETING_GUEST, name));
@@ -145,6 +127,7 @@ public class UserRequestServiceImpl implements UserRequestService {
             logger.error("Error during sending message: {}", sendResponse.description());
         }
     }
+
     private void greetingAdopterDogShelter(long chatId, String name) {
 
         SendMessage sendMessage =
@@ -156,6 +139,7 @@ public class UserRequestServiceImpl implements UserRequestService {
             logger.error("Error during sending message: {}", sendResponse.description());
         }
     }
+
     private void greetingAdopterCatShelter(long chatId, String name) {
 
         SendMessage sendMessage =
@@ -167,6 +151,7 @@ public class UserRequestServiceImpl implements UserRequestService {
             logger.error("Error during sending message: {}", sendResponse.description());
         }
     }
+
     private void blockedUser(long chatId, String name) {
         SendMessage sendMessage =
                 new SendMessage(chatId, String.format(NOT_GREETING_USER, name));
@@ -276,7 +261,7 @@ public class UserRequestServiceImpl implements UserRequestService {
                     break;
                 case CLICK_VISIT_DOG:
 
-                    //updateUserInGuestDogShelter(update);
+                    updateUserInGuestDogShelter(update);
 
                     break;
 
@@ -349,8 +334,6 @@ public class UserRequestServiceImpl implements UserRequestService {
 
     private void getDogShelterClick(long chatId) {
 
-        //сохраняем пользователя в БД приюта для собак
-
         SendMessage sendMessage = new SendMessage(chatId, GREETINGS_AT_THE_DOG_SHELTER);
         sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsDogShelter());
 
@@ -358,8 +341,6 @@ public class UserRequestServiceImpl implements UserRequestService {
     }
 
     private void getCatShelterClick(long chatId) {
-
-        //сохраняем пользователя в БД приюта для кошек
 
         SendMessage sendMessage = new SendMessage(chatId, GREETINGS_AT_THE_CAT_SHELTER);
         sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsCatShelter());
@@ -384,111 +365,118 @@ public class UserRequestServiceImpl implements UserRequestService {
         sendMessage(sendMessage);
     }
 
-//    private void getStart(long chatId) {
-//
-//        SendMessage sendMessage = new SendMessage(chatId, "");
-//        sendMessage.replyMarkup(replyKeyboardMarkupService.createStart());
-//
-//        sendMessage(sendMessage);
-//    }
-
     public void updateUserInGuestCatShelter(Update update) {
 
-
-        Message message = update.message();
-        Long chatId = message.from().id();
+        Message message = update.callbackQuery().message();
+        Long chatId = message.chat().id();
         String text = message.text();
+        long userId = message.from().id();
+        String userName = message.from().firstName();
 
-        String firstName = null;
-        String lastName = null;
-        String phoneNumber = null;
-        String carNumber = null;
+        String firstName;
+        String lastName;
+        String phoneNumber;
+        String carNumber;
+        ShelterType shelterType = ShelterType.CAT_SHELTER;
+        UserType userType = UserType.GUEST;
+        UserStatus userStatus = UserStatus.APPROVE;
 
-        sendMessage(chatId, "Чтобы записаться на посещение,\n" +
-                "нужно заполнить анкету:\n" +
-                "Напишите Ваше имя");
+        if ("Выберете, пожалуйста, вариант из предложенного меню!".equals(text)) {
 
-        if (text != null) {
-            Matcher matcher = patternName.matcher(text);
+            sendMessage(chatId, """
+                    Чтобы записаться на посещение,
+                    нужно заполнить анкету:
+                    Напишите Ваше Имя, Фамилию, номер телефона(без кода страны), номер машины в формате:
+                    Иван Иванов 1234567890 а123аа""");
+
+
+        } else if (text != null) {
+
+            Matcher matcher = pattern.matcher(text);
             if (matcher.find()) {
-                firstName = text;
 
-                sendMessage(chatId,
-                        "Напишите Вашу фамилию");
+                firstName = matcher.group(1);
+                lastName = matcher.group(2);
+                phoneNumber = matcher.group(3);
+                carNumber = matcher.group(4);
 
-                if (text != null) {
-                    Matcher matcher1 = patternName.matcher(text);
-                    if (matcher1.find()) {
-                        lastName = text;
+                User guest = new User(userId,
+                        userName,
+                        firstName,
+                        lastName,
+                        phoneNumber,
+                        carNumber,
+                        shelterType,
+                        userType,
+                        userStatus);
 
-                        sendMessage(chatId,
-                                "Напишите Ваш номер телефона без кода страны в формате: XXXХХХХХХХ");
+                User user = userRepository.findByUserId(userId);
+                userRepository.delete(user);
+                userRepository.save(guest);
 
-                        if (text != null) {
-                            Matcher matcher2 = patternPhone.matcher(text);
-                            if (matcher2.find()) {
-                                phoneNumber = '7' + text;
+                sendMessage(chatId, "Анкета успешно заполнена!");
+                getMainMenuClick(chatId);
 
-                                sendMessage(chatId,
-                                        "Напишите номер Вашей машины.");
-
-                                if (text != null) {
-                                    Matcher matcher3 = patternCar.matcher(text);
-                                    if (matcher3.find()) {
-                                        carNumber = text;
-                                        long userId = update.message().from().id();
-
-                                        userRepository.updateUserInGuestById(userId,
-                                                firstName,
-                                                lastName,
-                                                phoneNumber,
-                                                carNumber,
-                                                ShelterType.CAT_SHELTER,
-                                                UserType.GUEST,
-                                                UserStatus.APPROVE);
-
-                                        sendMessage(chatId, "Анкета успешно заполнена!");
-                                        getMainMenuClick(chatId);
-                                    } else {
-                                        sendMessage(chatId, "Номер введен некорректно!");
-                                    }
-                                    //sendMessage(sendMessage3);
-                                }
-
-                            } else {
-                                sendMessage(chatId, "Номер телефона введен некорректно!");
-                            }
-                            //sendMessage(sendMessage2);
-                        }
-                    } else {
-                        sendMessage(chatId, "Некорректный формат фамилии!");
-                    }
-                    //sendMessage(sendMessage1);
-                }
             } else {
-                sendMessage(chatId, "Некорректный формат имени!");
+                sendMessage(chatId, "Некорректный формат!");
             }
-            //sendMessage(sendMessage);
         }
     }
-    /*Matcher matcher = pattern.matcher(text);
-                if (matcher.find()) {
-        LocalDateTime dateTime = parse(matcher.group(1));
-        if (Objects.isNull(dateTime)) {
-            sendMessage(chatId, "Некорректный формат даты и/или времени!");
-        } else {
-            String txt = matcher.group(2);
-            NotificationTask notificationTask = new NotificationTask();
-            notificationTask.setChatId(chatId);
-            notificationTask.setMessage(txt);
-            notificationTask.setNotificationDateTime(dateTime);
-            notificationTaskService.save(notificationTask);
-            sendMessage(chatId, "Задача успешно запланирована!");
-        }
 
-    } else {
-        sendMessage(chatId, "Некорректный формат сообщения!");
-    }*/
+    public void updateUserInGuestDogShelter(Update update) {
+
+        Message message = update.callbackQuery().message();
+        Long chatId = message.chat().id();
+        String text = message.text();
+        long userId = message.from().id();
+        String userName = message.from().firstName();
+
+        String firstName;
+        String lastName;
+        String phoneNumber;
+        String carNumber;
+        ShelterType shelterType = ShelterType.DOG_SHELTER;
+        UserType userType = UserType.GUEST;
+        UserStatus userStatus = UserStatus.APPROVE;
+
+        sendMessage(chatId, """
+                Чтобы записаться на посещение,
+                нужно заполнить анкету:
+                Напишите Ваше Имя, Фамилию, номер телефона(без кода страны), номер машины в формате:
+                Иван Иванов 1234567890 а123аа""");
+
+        if (text != null) {
+
+            Matcher matcher = pattern.matcher(text);
+            if (matcher.find()) {
+
+                firstName = matcher.group(1);
+                lastName = matcher.group(2);
+                phoneNumber = matcher.group(3);
+                carNumber = matcher.group(4);
+
+                User guest = new User(userId,
+                        userName,
+                        firstName,
+                        lastName,
+                        phoneNumber,
+                        carNumber,
+                        shelterType,
+                        userType,
+                        userStatus);
+
+                User user = userRepository.findByUserId(userId);
+                userRepository.delete(user);
+                userRepository.save(guest);
+
+                sendMessage(chatId, "Анкета успешно заполнена!");
+                getMainMenuClick(chatId);
+
+            } else {
+                sendMessage(chatId, "Некорректный формат!");
+            }
+        }
+    }
 
     private void getMenu(long chatId) {
 

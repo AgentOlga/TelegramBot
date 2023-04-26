@@ -9,6 +9,7 @@ import com.example.telegrambot.model.User;
 import com.example.telegrambot.repository.UserRepository;
 import com.example.telegrambot.services.UserService;
 import com.example.telegrambot.services.ValidationService;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -16,7 +17,7 @@ import java.util.Collection;
 /**
  * Бизнес-логика по работе с пользователями
  */
-@Service
+@Component
 public class UserServiceImpl implements UserService {
 
     private final ValidationService validationService;
@@ -42,14 +43,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User addGuest(long userId,
-                            String nickName,
-                            UserType userType,
-                            ShelterType shelterType,
-                            UserStatus userStatus,
-                            String firstName,
-                            String lastName,
-                            String phoneNumber,
-                            String carNumber) {
+                         String nickName,
+                         UserType userType,
+                         ShelterType shelterType,
+                         UserStatus userStatus,
+                         String firstName,
+                         String lastName,
+                         String phoneNumber,
+                         String carNumber) {
 
         User newGuest = new User(userId,
                 nickName,
@@ -64,14 +65,15 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             throw new NotFoundUserException(toString());
         }
-        userRepository.updateUserInGuestById(userId,
+        userRepository.updateUserInGuestById(
                 firstName,
                 lastName,
                 phoneNumber,
                 carNumber,
                 shelterType,
                 userType,
-                userStatus);
+                userStatus,
+                userId);
 
         return newGuest;
     }
