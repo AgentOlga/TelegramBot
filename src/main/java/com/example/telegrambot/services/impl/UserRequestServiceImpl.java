@@ -107,14 +107,14 @@ public class UserRequestServiceImpl implements UserRequestService {
     }
 
     private void greetingVolunteer(long chatId, String name) {
-        /*SendMessage sendMessage =
+        SendMessage sendMessage =
                 new SendMessage(chatId, String.format(GREETING_VOLUNTEER, name));
 
-        sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsShelterTypeSelect());
+        sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsVolunteerMenu());
         SendResponse sendResponse = telegramBot.execute(sendMessage);
         if (!sendResponse.isOk()) {
             logger.error("Error during sending message: {}", sendResponse.description());
-        }*/
+        }
     }
 
     private void greetingGuest(long chatId, String name) {
@@ -264,7 +264,16 @@ public class UserRequestServiceImpl implements UserRequestService {
                     updateUserInGuestDogShelter(update);
 
                     break;
+                case CLICK_CHECK_REPORT:
 
+//                    getCheckReport(update);
+
+                    break;
+                case CLICK_FREE_MESSAGE:
+
+//                    getFreeMessage(update);
+
+                    break;
             }
         }
     }

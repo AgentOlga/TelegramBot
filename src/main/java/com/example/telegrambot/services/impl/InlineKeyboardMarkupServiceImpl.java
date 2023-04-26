@@ -205,4 +205,21 @@ public class InlineKeyboardMarkupServiceImpl implements InlineKeyboardMarkupServ
                 .callbackData(CLICK_HOW_TO_ADOPT_A_DOG));
         return inlineKeyboardMarkup;
     }
+
+    @Override
+    public InlineKeyboardMarkup createButtonsVolunteerMenu() {
+
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+
+
+
+        //todo остальные кнопки меню
+
+
+        inlineKeyboardMarkup.addRow(new InlineKeyboardButton(BUTTON_CHECK_REPORT)
+                .callbackData(CLICK_CHECK_REPORT));
+        inlineKeyboardMarkup.addRow(new InlineKeyboardButton(BUTTON_FREE_MESSAGE)
+                .callbackData(CLICK_FREE_MESSAGE));
+        return inlineKeyboardMarkup;
+    }
 }
