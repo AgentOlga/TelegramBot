@@ -1,6 +1,8 @@
 package com.example.telegrambot.services;
 
 import com.example.telegrambot.model.Adopter;
+import com.example.telegrambot.model.Animal;
+import com.example.telegrambot.model.Shelter;
 import com.example.telegrambot.model.User;
 
 import java.util.Collection;
@@ -12,33 +14,39 @@ public interface AdopterService {
 
     /**
      * Сохраняем нового усыновителя
+     *
      * @param adopter новый усыновитель
      * @return сохраненный усыновитель
      */
     Adopter saveAdopter(Adopter adopter);
 
     /**
-     * Изменяем усыновителя
-     * @param adopter изменяемый усыновитель
+     * Изменяем усыновителя по его идентификатору
+     *
      * @return измененный усыновитель
      */
-    Adopter updateAdopter(Adopter adopter);
+    void updateAdopterById(Long id,
+                           User user,
+                           Animal animal,
+                           Shelter shelter);
 
     /**
-     * Удаляем усыновителя
-     * @param adopter усыновитель, которого нужно удалить
-     * @return удаленный усыновитель
+     * Удаляем усыновителя по его идентификатору
+     *
+     * @param id идентификатор
      */
-    Adopter deleteAdopter(Adopter adopter);
+    void deleteAdopterById(Long id);
 
     /**
      * Выводим всех сохраненных усыновителей
+     *
      * @return список усыновителей
      */
     Collection<Adopter> getAllAdopter();
 
     /**
      * Поиск усыновителя по id
+     *
      * @param id идентификатор усыновителя
      * @return найденный усыновитель
      */

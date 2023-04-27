@@ -1,4 +1,4 @@
-package com.example.telegrambot.constants.animalsConst;
+package com.example.telegrambot.constants;
 
 /**
  * в enum созданы

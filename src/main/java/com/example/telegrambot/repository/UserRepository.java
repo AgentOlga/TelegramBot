@@ -8,10 +8,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
+@Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
     /**
@@ -20,7 +19,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @param userId идентификатор в телеграмм
      * @return найденный пользователь
      */
-    //@Modifying
     @Query("SELECT u FROM User u WHERE u.userId = :user_id")
     User findByUserId(@Param("user_id") Long userId);
 
@@ -35,7 +33,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @param userType    тип пользователя
      * @param userStatus  статус пользователя
      */
-//    @Modifying
+    @Modifying
     @Query("UPDATE User u SET " +
             "u.firstName = :first_name, " +
             "u.lastName = :last_name," +
@@ -89,8 +87,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
                                   @Param("user_status") UserStatus userStatus,
                                   @Param("email") String email,
                                   @Param("address") String address);
-
-//    @Modifying
-//    @Query("SELECT FROM User WHERE userId=(?))
-//    Long removeAllLike(@Param(?) long userId);
 }

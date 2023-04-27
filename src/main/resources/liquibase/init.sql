@@ -12,6 +12,7 @@ CREATE TABLE users
     car_number    TEXT,
     email         TEXT,
     address       TEXT,
+    shelter_type  SMALLINT,-- enum ShelterType
     user_type     SMALLINT NOT NULL,-- enum UserType
     user_status   SMALLINT NOT NULL -- enum UserStatus
 );
@@ -43,76 +44,3 @@ CREATE TABLE shelters
     phone_security     TEXT     NOT NULL,
     shelter_type       SMALLINT NOT NULL -- enum ShelterType
 );
-
--- changeset aleksey:2
-
-INSERT INTO animals (nick_name, pet_type, color, sex)
-VALUES ('Шарик', 0, 2, 1);
-INSERT INTO animals (nick_name, pet_type, color, sex)
-VALUES ('Барсик', 1, 0, 1);
-INSERT INTO animals (nick_name, pet_type, color, sex)
-VALUES ('Мурзик', 1, 1, 1);
-INSERT INTO animals (nick_name, pet_type, color, sex)
-VALUES ('Лиза', 0, 3, 0);
-INSERT INTO animals (nick_name, pet_type, color, sex)
-VALUES ('Боня', 0, 2, 0);
-
-
-INSERT INTO shelters (address_shelter,
-                      time_work,
-                      driving_directions,
-                      phone_shelter,
-                      phone_security,
-                      shelter_type)
-VALUES ('адрес',
-        'время работы',
-        'ссылка на местоположение',
-        'телефон приюта',
-        'телефон охраны',
-        0);
-
-INSERT INTO shelters (address_shelter,
-                      time_work,
-                      driving_directions,
-                      phone_shelter,
-                      phone_security,
-                      shelter_type)
-VALUES ('адрес',
-        'время работы',
-        'ссылка на местоположение',
-        'телефон приюта',
-        'телефон охраны',
-        1);
-
--- changeset aleksey:3
-
-UPDATE users SET first_name='Иван',
-                 last_name='Иванов',
-                 address='qweert',
-                 phone_number='1234556',
-                 car_number='123',
-                 email='qwerty',
-                 user_type=2
-WHERE id=1;
-
--- changeset aleksey:4
-
-INSERT INTO adopters (user_id, animal_id, shelter_id)
-VALUES (1,3,0);
-
--- changeset aleksey:5
-
-ALTER TABLE users ADD COLUMN IF NOT EXISTS shelter_type SMALLINT;
-
--- changeset aleksey:6
-
-UPDATE users SET shelter_type=0
-WHERE id=2;
-
--- changeset aleksey:7
-
-UPDATE users SET shelter_type=0
-WHERE id=1;
-
-UPDATE users SET shelter_type=null
-WHERE id=2;
