@@ -1,8 +1,6 @@
 package com.example.telegrambot.model;
 
-import com.example.telegrambot.constants.UserStatus;
-import com.example.telegrambot.constants.UserType;
-import com.example.telegrambot.constants.animalsConst.PetType;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -30,7 +28,7 @@ public class Adopter {
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "animal_id")
-    private Animals animals;
+    private Animal animal;
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "shelter_id")

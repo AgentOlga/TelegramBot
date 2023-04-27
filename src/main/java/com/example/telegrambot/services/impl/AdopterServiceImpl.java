@@ -3,6 +3,9 @@ package com.example.telegrambot.services.impl;
 import com.example.telegrambot.exception.NotFoundAdopterException;
 import com.example.telegrambot.exception.ValidationException;
 import com.example.telegrambot.model.Adopter;
+import com.example.telegrambot.model.Animal;
+import com.example.telegrambot.model.Shelter;
+import com.example.telegrambot.model.User;
 import com.example.telegrambot.repository.AdopterRepository;
 import com.example.telegrambot.services.AdopterService;
 import com.example.telegrambot.services.ValidationService;
@@ -33,20 +36,26 @@ public class AdopterServiceImpl implements AdopterService {
     }
 
     @Override
-    public Adopter updateAdopter(Adopter adopter) {
-        if (adopterRepository.findById(adopter.getId()).orElse(null) == null) {
-            return null;
+    public void updateAdopterById(Long id,
+                                  User user,
+                                  Animal animal,
+                                  Shelter shelter) {
+
+        Adopter adopter = adopterRepository.getReferenceById(id);
+        if (adopter == null) {
+            throw new NotFoundAdopterException("Усыновитель не найден!");
         }
-        return adopterRepository.save(adopter);
+        adopterRepository.updateAdopterById(id, user, animal, shelter);
     }
 
     @Override
-    public Adopter deleteAdopter(Adopter adopter) {
-        if (adopterRepository.findById(adopter.getId()).orElse(null) == null) {
-            return null;
+    public void deleteAdopterById(Long id) {
+
+        Adopter adopter = adopterRepository.getReferenceById(id);
+        if (adopter == null) {
+            throw new NotFoundAdopterException("Усыновитель не найден!");
         }
         adopterRepository.delete(adopter);
-        return adopter;
     }
 
     @Override
@@ -56,7 +65,7 @@ public class AdopterServiceImpl implements AdopterService {
 
     @Override
     public Adopter foundAdopterById(long id) {
-        Adopter adopter = adopterRepository.findById(id).orElse(null);
+        Adopter adopter = adopterRepository.getReferenceById(id);
         if (adopter == null) {
             throw new NotFoundAdopterException(toString());
         }

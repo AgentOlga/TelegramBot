@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService {
                 userStatus);
         User user = userRepository.findByUserId(userId);
         if (user == null) {
-            throw new NotFoundUserException(toString());
+            throw new NotFoundUserException("Пользователь не найден!");
         }
         userRepository.updateUserInGuestById(
                 firstName,
@@ -104,7 +104,7 @@ public class UserServiceImpl implements UserService {
                 userStatus);
         User user = userRepository.findByUserId(userId);
         if (user == null) {
-            throw new NotFoundUserException(toString());
+            throw new NotFoundUserException("Пользователь не найден!");
         }
         userRepository.updateGuestInAdopterById(userId,
                 firstName,

@@ -2,7 +2,6 @@ package com.example.telegrambot.services.impl;
 
 import com.example.telegrambot.model.*;
 import com.example.telegrambot.services.ValidationService;
-import org.springframework.boot.jdbc.metadata.AbstractDataSourcePoolMetadata;
 import org.springframework.stereotype.Service;
 
 /**
@@ -35,15 +34,15 @@ public class ValidationServiceImpl implements ValidationService {
                     && ((User) object).getUserType() != null
                     && ((User) object).getUserStatus() != null;
 
-        } else if (object instanceof Animals) {
-            return ((Animals) object).getColor() != null
-                    && ((Animals) object).getNickName() != null
-                    && ((Animals) object).getPetType() != null
-                    && ((Animals) object).getSex() != null;
+        } else if (object instanceof Animal) {
+            return ((Animal) object).getColor() != null
+                    && ((Animal) object).getNickName() != null
+                    && ((Animal) object).getPetType() != null
+                    && ((Animal) object).getSex() != null;
 
         } else if (object instanceof Adopter) {
             return ((Adopter) object).getShelter() != null
-                    && ((Adopter) object).getAnimals() != null;
+                    && ((Adopter) object).getAnimal() != null;
 
         } else if (object instanceof Shelter) {
             return ((Shelter) object).getAddressShelter() != null

@@ -1,8 +1,6 @@
 package com.example.telegrambot.services;
 
 import com.pengrad.telegrambot.model.Update;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 
 /**
  * Сервис по работе с запросами пользователей.

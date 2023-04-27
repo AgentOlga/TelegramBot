@@ -1,6 +1,11 @@
 package com.example.telegrambot.controller;
 
+import com.example.telegrambot.constants.UserStatus;
+import com.example.telegrambot.constants.UserType;
 import com.example.telegrambot.model.Adopter;
+import com.example.telegrambot.model.Animal;
+import com.example.telegrambot.model.Shelter;
+import com.example.telegrambot.model.User;
 import com.example.telegrambot.services.AdopterService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -30,8 +35,7 @@ public class AdopterController {
     @Operation(
             summary = "Регистрация усыновителя",
             description = "Нужно написать данные усыновителя " +
-                    "(имя, фамилия, номер телефона, номер машины (если есть)," +
-                    "эл.почту, адрес, приют, статус)"
+                    "(id пользователя, id животного, id приюта)"
     )
     @ApiResponse(
             responseCode = "200",
@@ -55,12 +59,11 @@ public class AdopterController {
         }
     }
 
-    @PutMapping
+    @PutMapping("/{id}")
     @Operation(
-            summary = "Изменения данных усыновителя",
+            summary = "Изменения данных усыновителя по идентификатору",
             description = "Нужно написать новые данные усыновителя " +
-                    "(имя, фамилия, номер телефона, номер машины (если есть)," +
-                    "эл.почту, адрес, приют, статус)"
+                    "(id пользователя, id животного, id приюта)"
     )
     @ApiResponse(
             responseCode = "200",
@@ -74,22 +77,24 @@ public class AdopterController {
             responseCode = "500",
             description = "Произошла ошибка, не зависящая от вызывающей стороны"
     )
-    public ResponseEntity<Adopter> updateAdopter(@RequestBody Adopter adopter) {
+    public ResponseEntity<Void> updateAdopter(@PathVariable Long id,
+                                              @RequestParam(required = false) User user,
+                                              @RequestParam(required = false) Animal animal,
+                                              @RequestParam(required = false) Shelter shelter) {
 
         try {
-            return ResponseEntity.ok(adopterService.updateAdopter(adopter));
+            adopterService.updateAdopterById(id, user, animal, shelter);
+            return ResponseEntity.ok().build();
         } catch (RuntimeException e) {
             e.getStackTrace();
             return ResponseEntity.notFound().build();
         }
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     @Operation(
-            summary = "Удаление усыновителя",
-            description = "Нужно написать данные усыновителя, которого нужно удалить " +
-                    "(имя, фамилия, номер телефона, номер машины (если есть)," +
-                    "эл.почту, адрес, приют, статус)"
+            summary = "Удаление усыновителя по идентификатору",
+            description = "Нужно написать id усыновителя, которого нужно удалить"
     )
     @ApiResponse(
             responseCode = "200",
@@ -103,10 +108,11 @@ public class AdopterController {
             responseCode = "500",
             description = "Произошла ошибка, не зависящая от вызывающей стороны"
     )
-    public ResponseEntity<Adopter> deleteAdopter(@RequestBody Adopter adopter) {
+    public ResponseEntity<Void> deleteAdopterById(@PathVariable Long id) {
 
         try {
-            return ResponseEntity.ok(adopterService.deleteAdopter(adopter));
+            adopterService.deleteAdopterById(id);
+            return ResponseEntity.ok().build();
         } catch (RuntimeException e) {
             e.getStackTrace();
             return ResponseEntity.notFound().build();
@@ -140,7 +146,7 @@ public class AdopterController {
     }
 
 
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     @Operation(
             summary = "Поиск усыновителя по id"
     )

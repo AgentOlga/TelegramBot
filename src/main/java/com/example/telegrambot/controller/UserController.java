@@ -3,7 +3,6 @@ package com.example.telegrambot.controller;
 import com.example.telegrambot.constants.ShelterType;
 import com.example.telegrambot.constants.UserStatus;
 import com.example.telegrambot.constants.UserType;
-import com.example.telegrambot.model.Adopter;
 import com.example.telegrambot.model.User;
 import com.example.telegrambot.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;

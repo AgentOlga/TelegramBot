@@ -1,8 +1,9 @@
 package com.example.telegrambot.model;
 
-import com.example.telegrambot.constants.animalsConst.Color;
-import com.example.telegrambot.constants.animalsConst.PetType;
-import com.example.telegrambot.constants.animalsConst.Sex;
+import com.example.telegrambot.constants.Color;
+import com.example.telegrambot.constants.PetType;
+import com.example.telegrambot.constants.Sex;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,7 +22,7 @@ import lombok.*;
 @NoArgsConstructor
 @Entity
 @Table(name = "animals")
-public class Animals {
+public class Animal {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,7 +41,7 @@ public class Animals {
     @Column(name = "sex")
     private Sex sex;
 
-    public Animals(String nickName, PetType petType, Color color, Sex sex) {
+    public Animal(String nickName, PetType petType, Color color, Sex sex) {
         this.nickName = nickName;
         this.petType = petType;
         this.color = color;
