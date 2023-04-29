@@ -89,4 +89,6 @@ public interface InlineKeyboardMarkupService {
      * @return клавиатуру.
      */
     InlineKeyboardMarkup createButtonsVolunteerMenu();
+
+    InlineKeyboardMarkup createButtonsCheckReport();
 }

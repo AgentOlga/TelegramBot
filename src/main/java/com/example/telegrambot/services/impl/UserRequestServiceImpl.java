@@ -1,31 +1,32 @@
 package com.example.telegrambot.services.impl;
 
 import com.example.telegrambot.constants.ShelterType;
+import com.example.telegrambot.constants.StatusReport;
 import com.example.telegrambot.constants.UserStatus;
 import com.example.telegrambot.constants.UserType;
 import com.example.telegrambot.listener.TelegramBotUpdatesListener;
+import com.example.telegrambot.model.Report;
 import com.example.telegrambot.model.User;
 import com.example.telegrambot.repository.AdopterRepository;
+import com.example.telegrambot.repository.ReportRepository;
 import com.example.telegrambot.repository.UserRepository;
-import com.example.telegrambot.services.InlineKeyboardMarkupService;
-import com.example.telegrambot.services.ReplyKeyboardMarkupService;
-import com.example.telegrambot.services.UserRequestService;
-import com.example.telegrambot.services.UserService;
+import com.example.telegrambot.services.*;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.CallbackQuery;
 import com.pengrad.telegrambot.model.Message;
+import com.pengrad.telegrambot.model.PhotoSize;
 import com.pengrad.telegrambot.model.Update;
-import com.pengrad.telegrambot.model.request.KeyboardButton;
-import com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup;
+import com.pengrad.telegrambot.request.GetFile;
 import com.pengrad.telegrambot.request.SendMessage;
+import com.pengrad.telegrambot.response.GetFileResponse;
 import com.pengrad.telegrambot.response.SendResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.io.IOException;
+import java.time.LocalDate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,13 +37,14 @@ import static com.example.telegrambot.constants.ConstantValue.*;
  */
 @Component
 public class UserRequestServiceImpl implements UserRequestService {
-
-    private final Pattern patternName = Pattern
-            .compile("^[a-zA-Zа-яА-Я]+$");//ALT+Enter -> check
-    private final Pattern patternPhone = Pattern
-            .compile("(\\d{10})");//ALT+Enter -> check
-    private final Pattern patternCar = Pattern
-            .compile("^[a-zA-Z0-9]+$");//ALT+Enter -> check
+    private static String textReport;
+    private static byte[] picture;
+//    private final Pattern patternName = Pattern
+//            .compile("^[a-zA-Zа-яА-Я]+$");//ALT+Enter -> check
+//    private final Pattern patternPhone = Pattern
+//            .compile("(\\d{10})");//ALT+Enter -> check
+//    private final Pattern patternCar = Pattern
+//            .compile("^[a-zA-Z0-9]+$");//ALT+Enter -> check
     private final Pattern pattern = Pattern
             .compile("(^[А-я]+)\\s+([А-я]+)\\s+(\\d{10})\\s+([А-я0-9\\d]+$)");//ALT+Enter -> check
     private final InlineKeyboardMarkupService inlineKeyboardMarkupService;
@@ -51,6 +53,8 @@ public class UserRequestServiceImpl implements UserRequestService {
     private final TelegramBot telegramBot;
     private final UserService userService;
     private final UserRepository userRepository;
+    private final ReportService reportService;
+    private final ReportRepository reportRepository;
     private final AdopterRepository adopterRepository;
 
     public UserRequestServiceImpl(InlineKeyboardMarkupService inlineKeyboardMarkupService,
@@ -58,12 +62,16 @@ public class UserRequestServiceImpl implements UserRequestService {
                                   TelegramBot telegramBot,
                                   UserService userService,
                                   UserRepository userRepository,
-                                  AdopterRepository adopterRepository) {
+                                  ReportService reportService,
+                                  ReportRepository reportRepository, AdopterRepository adopterRepository) {
+
         this.inlineKeyboardMarkupService = inlineKeyboardMarkupService;
         this.replyKeyboardMarkupService = replyKeyboardMarkupService;
         this.telegramBot = telegramBot;
         this.userService = userService;
         this.userRepository = userRepository;
+        this.reportService = reportService;
+        this.reportRepository = reportRepository;
         this.adopterRepository = adopterRepository;
     }
 
@@ -256,17 +264,22 @@ public class UserRequestServiceImpl implements UserRequestService {
                     break;
                 case CLICK_VISIT_CAT:
 
-                    updateUserInGuestCatShelter(update);
+                    sendMessage(chatId, """
+                            Чтобы записаться на посещение,
+                            нужно заполнить анкету:
+                            Напишите Ваше Имя, Фамилию, номер телефона(без кода страны), номер машины в формате:
+                            Иван Иванов 1234567890 а123аа""");
+                    updateUserInGuestCatShelter(update); //метод вызывается, но пишет, что Cannot invoke "com.pengrad.telegrambot.model.Message.chat()" because "message" is null
 
                     break;
                 case CLICK_VISIT_DOG:
 
-                    updateUserInGuestDogShelter(update);
+                    updateUserInGuestDogShelter(update); //метод вызывается, но пишет, что Cannot invoke "com.pengrad.telegrambot.model.Message.chat()" because "message" is null
 
                     break;
                 case CLICK_CHECK_REPORT:
 
-//                    getCheckReport(update);
+                    getCheckReport(update);
 
                     break;
                 case CLICK_FREE_MESSAGE:
@@ -274,8 +287,85 @@ public class UserRequestServiceImpl implements UserRequestService {
 //                    getFreeMessage(update);
 
                     break;
+                case CLICK_REPORT_CAT:
+                case CLICK_REPORT_DOG:
+
+                    sendMessage(chatId, """
+                            Отправьте отчет о питомце:
+                            фото питомца;
+                            рацион питомца;
+                            общее самочувствие и привыкание к новому мету;
+                            изменение в поведении.""");
+                    reportEnter(update); //метод вызывается, но пишет, что Cannot invoke "com.pengrad.telegrambot.model.Message.chat()" because "message" is null
+
+                    break;
             }
         }
+    }
+
+    private void reportEnter(Update update) {
+
+        Message message = update.message();
+        long chatId = message.chat().id();
+        String text = message.text();
+        long userId = message.from().id();
+
+        User user = userRepository.findByUserId(userId);
+        Report report = reportRepository.findReportByUserId(user);
+//        String textReport;
+//        byte[] picture;
+        LocalDate dateReport = LocalDate.now();
+//        LocalDate dateEndOfProbation = null;
+
+        StatusReport statusReport;
+
+        if (text != null) {
+            textReport = text;
+            sendMessage(chatId, "текст заполнен!");
+        } else if (message.photo() != null) {
+            PhotoSize photoSize = message.photo()[message.photo().length - 1];
+            GetFileResponse getFileResponse = telegramBot.execute(
+                    new GetFile(photoSize.fileId()));
+
+            if (getFileResponse.isOk()) {
+                try {
+                    picture = telegramBot.getFileContent(getFileResponse.file());
+                    sendMessage(chatId, "фото отправлено!");
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
+        if (textReport != null && picture != null) {
+            statusReport = StatusReport.ACCEPTED;
+
+        } else {
+            statusReport = StatusReport.NOT_ACCEPTED;
+        }
+
+        if (report == null) {
+            reportService.saveReport(user,
+                    dateReport,
+                    statusReport,
+                    textReport,
+                    picture);
+        } else {
+            reportService.updateReportByUserId(user,
+                    dateReport,
+                    statusReport,
+                    textReport,
+                    picture);
+        }
+    }
+
+    private void getCheckReport(Update update) {
+
+//        Report report =
+//        SendMessage sendMessage = new SendMessage(chatId, GREETINGS_AT_THE_SHELTER_INFO);
+//        sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsCheckReport());
+//
+//        sendMessage(sendMessage);
     }
 
     private void getDogAtHomeClick(long chatId) {
@@ -376,8 +466,10 @@ public class UserRequestServiceImpl implements UserRequestService {
 
     public void updateUserInGuestCatShelter(Update update) {
 
-        Message message = update.callbackQuery().message();
-        Long chatId = message.chat().id();
+        logger.info("Handles update: {}", update);
+
+        Message message = update.message();
+        long chatId = message.chat().id();
         String text = message.text();
         long userId = message.from().id();
         String userName = message.from().firstName();
@@ -390,16 +482,16 @@ public class UserRequestServiceImpl implements UserRequestService {
         UserType userType = UserType.GUEST;
         UserStatus userStatus = UserStatus.APPROVE;
 
-        if ("Выберете, пожалуйста, вариант из предложенного меню!".equals(text)) {
+//        if ("Выберете, пожалуйста, вариант из предложенного меню!".equals(text)) {
 
-            sendMessage(chatId, """
-                    Чтобы записаться на посещение,
-                    нужно заполнить анкету:
-                    Напишите Ваше Имя, Фамилию, номер телефона(без кода страны), номер машины в формате:
-                    Иван Иванов 1234567890 а123аа""");
+//            sendMessage(chatId, """
+//                    Чтобы записаться на посещение,
+//                    нужно заполнить анкету:
+//                    Напишите Ваше Имя, Фамилию, номер телефона(без кода страны), номер машины в формате:
+//                    Иван Иванов 1234567890 а123аа""");
 
 
-        } else if (text != null) {
+        if (text != null) {
 
             Matcher matcher = pattern.matcher(text);
             if (matcher.find()) {
@@ -409,19 +501,15 @@ public class UserRequestServiceImpl implements UserRequestService {
                 phoneNumber = matcher.group(3);
                 carNumber = matcher.group(4);
 
-                User guest = new User(userId,
+                userService.addGuest(userId,
                         userName,
+                        userType,
+                        shelterType,
+                        userStatus,
                         firstName,
                         lastName,
                         phoneNumber,
-                        carNumber,
-                        shelterType,
-                        userType,
-                        userStatus);
-
-                User user = userRepository.findByUserId(userId);
-                userRepository.delete(user);
-                userRepository.save(guest);
+                        carNumber);
 
                 sendMessage(chatId, "Анкета успешно заполнена!");
                 getMainMenuClick(chatId);
@@ -430,6 +518,8 @@ public class UserRequestServiceImpl implements UserRequestService {
                 sendMessage(chatId, "Некорректный формат!");
             }
         }
+
+
     }
 
     public void updateUserInGuestDogShelter(Update update) {
@@ -464,19 +554,15 @@ public class UserRequestServiceImpl implements UserRequestService {
                 phoneNumber = matcher.group(3);
                 carNumber = matcher.group(4);
 
-                User guest = new User(userId,
+                userService.addGuest(userId,
                         userName,
+                        userType,
+                        shelterType,
+                        userStatus,
                         firstName,
                         lastName,
                         phoneNumber,
-                        carNumber,
-                        shelterType,
-                        userType,
-                        userStatus);
-
-                User user = userRepository.findByUserId(userId);
-                userRepository.delete(user);
-                userRepository.save(guest);
+                        carNumber);
 
                 sendMessage(chatId, "Анкета успешно заполнена!");
                 getMainMenuClick(chatId);
@@ -504,14 +590,6 @@ public class UserRequestServiceImpl implements UserRequestService {
         }
     }
 
-
-     /*private void saveUser(long chatId, PetType lastMenu) {
-        User user = userRepository.findByChatId(chatId);
-        if (user == null) {
-            guest = new Guest(chatId, new Timestamp(System.currentTimeMillis()), lastMenu);
-            guestRepository.save(guest);
-        }
-    }*/
 
     /*public void updateUserInGuest(Update update, long chatId) {
 

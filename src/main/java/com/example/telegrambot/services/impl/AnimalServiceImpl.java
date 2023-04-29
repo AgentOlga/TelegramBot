@@ -10,6 +10,7 @@ import com.example.telegrambot.repository.AnimalRepository;
 import com.example.telegrambot.services.AnimalService;
 import com.example.telegrambot.services.ValidationService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 
@@ -42,6 +43,7 @@ public class AnimalServiceImpl implements AnimalService {
     }
 
     @Override
+    @Transactional
     public void updateAnimalById(Long id,
                                  String nickName,
                                  PetType petType,

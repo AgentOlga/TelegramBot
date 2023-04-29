@@ -10,6 +10,7 @@ import com.example.telegrambot.repository.AdopterRepository;
 import com.example.telegrambot.services.AdopterService;
 import com.example.telegrambot.services.ValidationService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 
@@ -36,6 +37,7 @@ public class AdopterServiceImpl implements AdopterService {
     }
 
     @Override
+    @Transactional
     public void updateAdopterById(Long id,
                                   User user,
                                   Animal animal,

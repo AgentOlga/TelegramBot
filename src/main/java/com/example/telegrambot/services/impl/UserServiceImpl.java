@@ -11,6 +11,7 @@ import com.example.telegrambot.services.UserService;
 import com.example.telegrambot.services.ValidationService;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 
@@ -42,6 +43,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public User addGuest(long userId,
                          String nickName,
                          UserType userType,
@@ -79,6 +81,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public User addAdopterOrVolunteer(long userId,
                                       String nickName,
                                       UserType userType,

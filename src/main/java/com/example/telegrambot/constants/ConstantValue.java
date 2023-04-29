@@ -146,10 +146,14 @@ public class ConstantValue {
      */
     public static final String BUTTON_CHECK_REPORT = "Проверить отчет";
     public static final String BUTTON_FREE_MESSAGE = "Свободное сообщение";
+    public static final String BUTTON_OK = "Отчет в порядке";
+    public static final String BUTTON_NOT_OK = "Есть проблемы с отчетом";
 
     /**
      * Текст под кнопками ВОЛОНТЕРОВ- callbackQuery.data().
      */
     public static final String CLICK_CHECK_REPORT = "CLICK_CHECK_REPORT";
-    public static final String CLICK_FREE_MESSAGE = "CLICK_FREE_MESSAGE";
+    public static final String CLICK_FREE_MESSAGE= "CLICK_FREE_MESSAGE";
+    public static final String CLICK_OK = "CLICK_OK";
+    public static final String CLICK_NOT_OK = "CLICK_NOT_OK";
 }
