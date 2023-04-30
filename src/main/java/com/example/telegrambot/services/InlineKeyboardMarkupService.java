@@ -83,4 +83,12 @@ public interface InlineKeyboardMarkupService {
      * @return клавиатуру.
      */
     InlineKeyboardMarkup createButtonsDogAtHome();
+
+    /**
+     * Создание кнопок для меню волонтеров.
+     * @return клавиатуру.
+     */
+    InlineKeyboardMarkup createButtonsVolunteerMenu();
+
+    InlineKeyboardMarkup createButtonsCheckReport();
 }
