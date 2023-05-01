@@ -46,13 +46,13 @@ public class UserController {
             responseCode = "500",
             description = "Произошла ошибка, не зависящая от вызывающей стороны"
     )
-    public ResponseEntity<User> addNewUser(@RequestParam(required = false) Long userId,
+    public ResponseEntity<User> addNewUser(@RequestParam(required = false) Long telegramId,
                                            @RequestParam(required = false) String telegramNick,
                                            @RequestParam(required = false) UserType userType,
                                            @RequestParam(required = false) UserStatus userStatus) {
 
         try {
-            return ResponseEntity.ok(userService.addUser(userId,
+            return ResponseEntity.ok(userService.addUser(telegramId,
                     telegramNick,
                     userType,
                     userStatus));
@@ -81,7 +81,7 @@ public class UserController {
             responseCode = "500",
             description = "Произошла ошибка, не зависящая от вызывающей стороны"
     )
-    public ResponseEntity<User> addNewGuest(@RequestParam(required = false) Long userId,
+    public ResponseEntity<User> addNewGuest(@RequestParam(required = false) Long telegramId,
                                             @RequestParam(required = false) String telegramNick,
                                             @RequestParam(required = false) String firstName,
                                             @RequestParam(required = false) String lastName,
@@ -92,7 +92,7 @@ public class UserController {
                                             @RequestParam(required = false) UserStatus userStatus) {
 
         try {
-            return ResponseEntity.ok(userService.addGuest(userId,
+            return ResponseEntity.ok(userService.addGuest(telegramId,
                     telegramNick,
                     userType,
                     shelterType,
@@ -127,7 +127,7 @@ public class UserController {
             responseCode = "500",
             description = "Произошла ошибка, не зависящая от вызывающей стороны"
     )
-    public ResponseEntity<User> addNewAdopterOrVolunteer(@RequestParam(required = false) Long userId,
+    public ResponseEntity<User> addNewAdopterOrVolunteer(@RequestParam(required = false) Long telegramId,
                                                          @RequestParam(required = false) String telegramNick,
                                                          @RequestParam(required = false) String firstName,
                                                          @RequestParam(required = false) String lastName,
@@ -140,7 +140,7 @@ public class UserController {
                                                          @RequestParam(required = false) UserStatus userStatus) {
 
         try {
-            return ResponseEntity.ok(userService.addAdopterOrVolunteer(userId,
+            return ResponseEntity.ok(userService.addAdopterOrVolunteer(telegramId,
                     telegramNick,
                     userType,
                     shelterType,

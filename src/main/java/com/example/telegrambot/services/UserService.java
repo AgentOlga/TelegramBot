@@ -12,22 +12,24 @@ import java.util.Collection;
  */
 public interface UserService {
 
+    User findUserByTelegramId(long userId);
+
     /**
      * Создание пользователя бота
-     * @param userId идентификатор в телеграмме
+     * @param telegramId идентификатор в телеграмме
      * @param nickName ник в телеграмме
      * @param userType тип пользователя
      * @param userStatus статус пользователя
      * @return созданный пользователь бота
      */
-    User addUser(long userId,
+    User addUser(long telegramId,
                  String nickName,
                  UserType userType,
                  UserStatus userStatus);
 
     /**
      * Создание гостя
-     * @param userId идентификатор в телеграмме
+     * @param telegramId идентификатор в телеграмме
      * @param nickName ник в телеграмме
      * @param userType тип пользователя
      * @param userStatus статус пользователя
@@ -37,7 +39,7 @@ public interface UserService {
      * @param carNumber номер машины
      * @return boolean
      */
-    User addGuest(long userId,
+    User addGuest(long telegramId,
                   String nickName,
                   UserType userType,
                   ShelterType shelterType,
@@ -49,7 +51,7 @@ public interface UserService {
 
     /**
      * Создание усыновителя
-     * @param userId идентификатор в телеграмме
+     * @param telegramId идентификатор в телеграмме
      * @param nickName ник в телеграмме
      * @param userType тип пользователя
      * @param userStatus статус пользователя
@@ -61,7 +63,7 @@ public interface UserService {
      * @param address адрес усыновителя
      * @return boolean
      */
-    User addAdopterOrVolunteer(long userId,
+    User addAdopterOrVolunteer(long telegramId,
                                String nickName,
                                UserType userType,
                                ShelterType shelterType,

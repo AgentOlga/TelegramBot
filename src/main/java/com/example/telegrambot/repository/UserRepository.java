@@ -16,16 +16,16 @@ public interface UserRepository extends JpaRepository<User, Long> {
     /**
      * Выводим пользователя по идентификатору в телеграмм
      *
-     * @param userId идентификатор в телеграмм
+     * @param telegramId идентификатор в телеграмм
      * @return найденный пользователь
      */
-    @Query("SELECT u FROM User u WHERE u.userId = :user_id")
-    User findByUserId(@Param("user_id") Long userId);
+    @Query("SELECT u FROM User u WHERE u.telegramId = :telegram_id")
+    User findByTelegramId(@Param("telegram_id") Long telegramId);
 
     /**
      * Изменяем пользователя до гостя
      *
-     * @param userId      идентификатор в телеграмм
+     * @param telegramId      идентификатор в телеграмм
      * @param firstName   имя гостя
      * @param lastName    фамилия гостя
      * @param phoneNumber телефон гостя
@@ -42,7 +42,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "u.shelterType = :shelter_type," +
             "u.userType = :user_type," +
             "u.userStatus = :user_status" +
-            " WHERE u.userId = :user_id")
+            " WHERE u.telegramId = :telegram_id")
     void updateUserInGuestById(
             @Param("first_name") String firstName,
             @Param("last_name") String lastName,
@@ -51,12 +51,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
             @Param("shelter_type") ShelterType shelterType,
             @Param("user_type") UserType userType,
             @Param("user_status") UserStatus userStatus,
-            @Param("user_id") Long userId);
+            @Param("telegram_id") Long telegramId);
 
     /**
      * Изменяем гостя до усыновителя/волонтера
      *
-     * @param userId      идентификатор в телеграмм
+     * @param telegramId      идентификатор в телеграмм
      * @param firstName   имя усыновителя/волонтера
      * @param lastName    фамилия усыновителя/волонтера
      * @param phoneNumber номер телефона усыновителя/волонтера
@@ -76,8 +76,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "u.userStatus = :user_status," +
             "u.email = :email," +
             "u.address = :address" +
-            " WHERE u.userId = :user_id")
-    void updateGuestInAdopterById(@Param("user_id") long userId,
+            " WHERE u.telegramId = :telegram_id")
+    void updateGuestInAdopterById(@Param("telegram_id") long telegramId,
                                   @Param("first_name") String firstName,
                                   @Param("last_name") String lastName,
                                   @Param("phone_number") String phoneNumber,

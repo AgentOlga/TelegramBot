@@ -218,8 +218,45 @@ public class InlineKeyboardMarkupServiceImpl implements InlineKeyboardMarkupServ
 
         inlineKeyboardMarkup.addRow(new InlineKeyboardButton(BUTTON_CHECK_REPORT)
                 .callbackData(CLICK_CHECK_REPORT));
+
+        return inlineKeyboardMarkup;
+    }
+
+    @Override
+    public InlineKeyboardMarkup createButtonsCheckReport() {
+
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         inlineKeyboardMarkup.addRow(new InlineKeyboardButton(BUTTON_FREE_MESSAGE)
                 .callbackData(CLICK_FREE_MESSAGE));
+        inlineKeyboardMarkup.addRow(new InlineKeyboardButton(BUTTON_OK)
+                .callbackData(CLICK_OK));
+        inlineKeyboardMarkup.addRow(new InlineKeyboardButton(BUTTON_NOT_OK)
+                .callbackData(CLICK_NOT_OK));
+
+        return inlineKeyboardMarkup;
+    }
+
+    @Override
+    public InlineKeyboardMarkup createButtonsCheckReportNotOk() {
+
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        inlineKeyboardMarkup.addRow(new InlineKeyboardButton(BUTTON_WARNING_REPORT)
+                .callbackData(CLICK_WARNING_REPORT));
+        inlineKeyboardMarkup.addRow(new InlineKeyboardButton(BUTTON_EXTEND)
+                .callbackData(CLICK_EXTEND));
+
+        return inlineKeyboardMarkup;
+    }
+
+    @Override
+    public InlineKeyboardMarkup createButtonsCheckReportNotOkExtend() {
+
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        inlineKeyboardMarkup.addRow(new InlineKeyboardButton(BUTTON_EXTEND_14_DAY)
+                .callbackData(CLICK_EXTEND_14_DAY));
+        inlineKeyboardMarkup.addRow(new InlineKeyboardButton(BUTTON_EXTEND_30_DAY)
+                .callbackData(CLICK_EXTEND_30_DAY));
+
         return inlineKeyboardMarkup;
     }
 }
