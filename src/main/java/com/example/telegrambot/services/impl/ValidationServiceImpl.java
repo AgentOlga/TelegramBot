@@ -14,18 +14,18 @@ public class ValidationServiceImpl implements ValidationService {
     public boolean validate(Object object) {
 
         if (object instanceof User) {
-            return ((User) object).getUserId() != 0
+            return ((User) object).getTelegramId() != 0
                     && ((User) object).getUserType() != null
                     && ((User) object).getUserStatus() != null
 
-                    || ((User) object).getUserId() != 0
+                    || ((User) object).getTelegramId() != 0
                     && ((User) object).getFirstName() != null
                     && ((User) object).getLastName() != null
                     && ((User) object).getPhoneNumber() != null
                     && ((User) object).getUserType() != null
                     && ((User) object).getUserStatus() != null
 
-                    ||((User) object).getUserId() != 0
+                    ||((User) object).getTelegramId() != 0
                     && ((User) object).getFirstName() != null
                     && ((User) object).getLastName() != null
                     && ((User) object).getAddress() != null

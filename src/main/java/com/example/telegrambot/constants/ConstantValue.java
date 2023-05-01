@@ -35,7 +35,8 @@ public class ConstantValue {
     public static final String GREETINGS_MAIN_MENU =
             "Выберете, пожалуйста, приют, из которого хотите забрать питомца!";
     public static final String GREETINGS_AT_THE_CAT_SHELTER = "Вы выбрали приют для кошек!\n" +
-            ConstantValue.GREETINGS_AT_THE_SHELTER_INFO;;
+            ConstantValue.GREETINGS_AT_THE_SHELTER_INFO;
+    ;
     public static final String GREETINGS_AT_THE_DOG_SHELTER = "Вы выбрали приют для собак!\n" +
             ConstantValue.GREETINGS_AT_THE_SHELTER_INFO;
     public static final String GREETINGS_AT_THE_SHELTER_INFO =
@@ -95,7 +96,7 @@ public class ConstantValue {
     public static final String CLICK_CAT_SHELTER_INFO = "click_Cat_Shelter_Info";
     public static final String CLICK_HOW_TO_ADOPT_A_CAT = "click_How_To_Adopt_A_Cat";
     public static final String CLICK_SEND_A_CAT_REPORT = "click_Send_A_Cat_Report";
-//    public static final String CLICK_CALL_A_VOLUNTEER = "click_Call_A_Volunteer_Cat";
+    //    public static final String CLICK_CALL_A_VOLUNTEER = "click_Call_A_Volunteer_Cat";
     public static final String CLICK_CAT_SHELTER_OVERVIEW = "click_Cat_Shelter_Overview";
     public static final String CLICK_CAR_PASS_CAT = "click_Car_Pass_Cat";
     public static final String CLICK_SAFETY_PRECAUTIONS_CAT = "click_Safety_Cat";
@@ -118,7 +119,7 @@ public class ConstantValue {
     public static final String CLICK_DOG_SHELTER_INFO = "click_Dog_Shelter_Info";
     public static final String CLICK_HOW_TO_ADOPT_A_DOG = "click_How_To_Adopt_A_Dog";
     public static final String CLICK_SEND_A_DOG_REPORT = "click_Send_A_Dog_Report";
-//    public static final String CLICK_CALL_A_VOLUNTEER_DOG = "click_Call_A_Volunteer_Dog";
+    //    public static final String CLICK_CALL_A_VOLUNTEER_DOG = "click_Call_A_Volunteer_Dog";
     public static final String CLICK_DOG_SHELTER_OVERVIEW = "click_Dog_Shelter_Overview";
     public static final String CLICK_CAR_PASS_DOG = "click_Car_Pass_Dog";
     public static final String CLICK_SAFETY_PRECAUTIONS_DOG = "click_Safety_Dog";
@@ -148,12 +149,20 @@ public class ConstantValue {
     public static final String BUTTON_FREE_MESSAGE = "Свободное сообщение";
     public static final String BUTTON_OK = "Отчет в порядке";
     public static final String BUTTON_NOT_OK = "Есть проблемы с отчетом";
+    public static final String BUTTON_WARNING_REPORT = "Предупредить усыновителя";
+    public static final String BUTTON_EXTEND = "Продлить испытательный срок";
+    public static final String BUTTON_EXTEND_14_DAY = "Продлить на 14 дней";
+    public static final String BUTTON_EXTEND_30_DAY = "Продлить на 30 дней";
 
     /**
      * Текст под кнопками ВОЛОНТЕРОВ- callbackQuery.data().
      */
     public static final String CLICK_CHECK_REPORT = "CLICK_CHECK_REPORT";
-    public static final String CLICK_FREE_MESSAGE= "CLICK_FREE_MESSAGE";
+    public static final String CLICK_FREE_MESSAGE = "CLICK_FREE_MESSAGE";
     public static final String CLICK_OK = "CLICK_OK";
     public static final String CLICK_NOT_OK = "CLICK_NOT_OK";
+    public static final String CLICK_WARNING_REPORT = "CLICK_WARNING";
+    public static final String CLICK_EXTEND = "CLICK_EXTEND";
+    public static final String CLICK_EXTEND_14_DAY = "CLICK_EXTEND_14_DAY";
+    public static final String CLICK_EXTEND_30_DAY = "CLICK_EXTEND_30_DAY";
 }

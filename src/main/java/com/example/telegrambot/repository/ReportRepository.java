@@ -43,4 +43,13 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     void updateDateEndOfProbationById(
             @Param("user_id") User user,
             @Param("date_end_of_probation") LocalDate dateEndOfProbation);
+
+    @Modifying
+    @Query("UPDATE Report r SET " +
+            "r.statusReport = :status_report " +
+            " WHERE r.userId = :user_id")
+
+    void updateStatusReportById(
+            @Param("user_id") User user,
+            @Param("status_report") StatusReport statusReport);
 }

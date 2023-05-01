@@ -235,4 +235,28 @@ public class InlineKeyboardMarkupServiceImpl implements InlineKeyboardMarkupServ
 
         return inlineKeyboardMarkup;
     }
+
+    @Override
+    public InlineKeyboardMarkup createButtonsCheckReportNotOk() {
+
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        inlineKeyboardMarkup.addRow(new InlineKeyboardButton(BUTTON_WARNING_REPORT)
+                .callbackData(CLICK_WARNING_REPORT));
+        inlineKeyboardMarkup.addRow(new InlineKeyboardButton(BUTTON_EXTEND)
+                .callbackData(CLICK_EXTEND));
+
+        return inlineKeyboardMarkup;
+    }
+
+    @Override
+    public InlineKeyboardMarkup createButtonsCheckReportNotOkExtend() {
+
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        inlineKeyboardMarkup.addRow(new InlineKeyboardButton(BUTTON_EXTEND_14_DAY)
+                .callbackData(CLICK_EXTEND_14_DAY));
+        inlineKeyboardMarkup.addRow(new InlineKeyboardButton(BUTTON_EXTEND_30_DAY)
+                .callbackData(CLICK_EXTEND_30_DAY));
+
+        return inlineKeyboardMarkup;
+    }
 }

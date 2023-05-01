@@ -10,7 +10,6 @@ import com.example.telegrambot.repository.UserRepository;
 import com.example.telegrambot.services.UserService;
 import com.example.telegrambot.services.ValidationService;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
@@ -25,16 +24,23 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
-    public UserServiceImpl(ValidationService validationService, UserRepository userRepository) {
+    public UserServiceImpl(ValidationService validationService,
+                           UserRepository userRepository) {
         this.validationService = validationService;
         this.userRepository = userRepository;
     }
 
     @Override
-    public User addUser(long userId, String nickName, UserType userType, UserStatus userStatus) {
+    @Transactional
+    public User findUserByTelegramId(long telegramId) {
+        return userRepository.findByTelegramId(telegramId);
+    }
 
-        User newUser = new User(userId, nickName, userType, userStatus);
-        User user = userRepository.findByUserId(userId);
+    @Override
+    public User addUser(long telegramId, String nickName, UserType userType, UserStatus userStatus) {
+
+        User newUser = new User(telegramId, nickName, userType, userStatus);
+        User user = userRepository.findByTelegramId(telegramId);
         if (user == null) {
             saveUser(newUser);
             return newUser;
@@ -44,7 +50,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public User addGuest(long userId,
+    public User addGuest(long telegramId,
                          String nickName,
                          UserType userType,
                          ShelterType shelterType,
@@ -54,7 +60,7 @@ public class UserServiceImpl implements UserService {
                          String phoneNumber,
                          String carNumber) {
 
-        User newGuest = new User(userId,
+        User newGuest = new User(telegramId,
                 nickName,
                 firstName,
                 lastName,
@@ -63,7 +69,7 @@ public class UserServiceImpl implements UserService {
                 shelterType,
                 userType,
                 userStatus);
-        User user = userRepository.findByUserId(userId);
+        User user = userRepository.findByTelegramId(telegramId);
         if (user == null) {
             throw new NotFoundUserException("Пользователь не найден!");
         }
@@ -75,14 +81,14 @@ public class UserServiceImpl implements UserService {
                 shelterType,
                 userType,
                 userStatus,
-                userId);
+                telegramId);
 
         return newGuest;
     }
 
     @Override
     @Transactional
-    public User addAdopterOrVolunteer(long userId,
+    public User addAdopterOrVolunteer(long telegramId,
                                       String nickName,
                                       UserType userType,
                                       ShelterType shelterType,
@@ -94,7 +100,7 @@ public class UserServiceImpl implements UserService {
                                       String email,
                                       String address) {
 
-        User newAdopterOrVolunteer = new User(userId,
+        User newAdopterOrVolunteer = new User(telegramId,
                 nickName,
                 firstName,
                 lastName,
@@ -105,11 +111,11 @@ public class UserServiceImpl implements UserService {
                 shelterType,
                 userType,
                 userStatus);
-        User user = userRepository.findByUserId(userId);
+        User user = userRepository.findByTelegramId(telegramId);
         if (user == null) {
             throw new NotFoundUserException("Пользователь не найден!");
         }
-        userRepository.updateGuestInAdopterById(userId,
+        userRepository.updateGuestInAdopterById(telegramId,
                 firstName,
                 lastName,
                 phoneNumber,

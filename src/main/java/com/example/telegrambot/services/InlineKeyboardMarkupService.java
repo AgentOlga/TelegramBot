@@ -91,4 +91,8 @@ public interface InlineKeyboardMarkupService {
     InlineKeyboardMarkup createButtonsVolunteerMenu();
 
     InlineKeyboardMarkup createButtonsCheckReport();
+
+    InlineKeyboardMarkup createButtonsCheckReportNotOk();
+
+    InlineKeyboardMarkup createButtonsCheckReportNotOkExtend();
 }

@@ -7,6 +7,7 @@ import com.example.telegrambot.constants.StatusReport;
 import com.example.telegrambot.model.Animal;
 import com.example.telegrambot.model.Report;
 import com.example.telegrambot.model.User;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -55,6 +56,10 @@ public interface ReportService {
      */
     void updateDateEndOfProbationById(User userId,
                                       LocalDate dateEndOfProbation);
+
+    @Transactional
+    void updateStatusReportById(User userId,
+                                StatusReport statusReport);
 
     /**
      * Удаляем отчет по его id

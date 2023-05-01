@@ -30,8 +30,8 @@ public class User {
     @Column(name = "id")
     private long id;
 
-    @Column(name = "user_id")
-    private long userId;
+    @Column(name = "telegram_id")
+    private long telegramId;
 
     @Column(name = "telegram_nick")
     private String telegramNick;
@@ -64,18 +64,18 @@ public class User {
     private UserStatus userStatus;
 
     //Конструктор для пользователя бота
-    public User(long userId,
+    public User(long telegramId,
                 String telegramNick,
                 UserType userType,
                 UserStatus userStatus) {
-        this.userId = userId;
+        this.telegramId = telegramId;
         setTelegramNick(telegramNick);
         this.userType = userType;
         this.userStatus = userStatus;
     }
 
     //Конструктор для гостя без машины
-    public User(long userId,
+    public User(long telegramId,
                 String telegramNick,
                 String firstName,
                 String lastName,
@@ -83,7 +83,7 @@ public class User {
                 ShelterType shelterType,
                 UserType userType,
                 UserStatus userStatus) {
-        this.userId = userId;
+        this.telegramId = telegramId;
         setTelegramNick(telegramNick);
         setFirstName(firstName);
         setLastName(lastName);
@@ -95,7 +95,7 @@ public class User {
 
     //Конструктор для гостя с машины
 
-    public User(long userId,
+    public User(long telegramId,
                 String telegramNick,
                 String firstName,
                 String lastName,
@@ -104,7 +104,7 @@ public class User {
                 ShelterType shelterType,
                 UserType userType,
                 UserStatus userStatus) {
-        this.userId = userId;
+        this.telegramId = telegramId;
         setTelegramNick(telegramNick);
         setFirstName(firstName);
         setLastName(lastName);
@@ -117,7 +117,7 @@ public class User {
 
     //Конструктор для усыновителя
 
-    public User(long userId,
+    public User(long telegramId,
                 String telegramNick,
                 String firstName,
                 String lastName,
@@ -128,7 +128,7 @@ public class User {
                 ShelterType shelterType,
                 UserType userType,
                 UserStatus userStatus) {
-        this.userId = userId;
+        this.telegramId = telegramId;
         setTelegramNick(telegramNick);
         setFirstName(firstName);
         setLastName(lastName);
