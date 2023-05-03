@@ -71,22 +71,21 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
     @Override
     public int process(List<Update> updates) {
-        try {
+        updates.forEach(update -> {
+            logger.info("Handles update: {}", update);
 
-            updates.forEach(update -> {
-                logger.info("Handles update: {}", update);
+            if (userRequestService.checkReport(update))
+                return;
 
-                if (update.message() == null) {
+            if (update.message() == null) {
+                //handle button click
+                userRequestService.createButtonClick(update);
+            } else {
+                //handle user input
+                userRequestService.sendMessageStart(update);
+            }
+        });
 
-                    userRequestService.createButtonClick(update);
-                } else {
-
-                    userRequestService.sendMessageStart(update);
-                }
-            });
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-        }
         return UpdatesListener.CONFIRMED_UPDATES_ALL;
     }
 }

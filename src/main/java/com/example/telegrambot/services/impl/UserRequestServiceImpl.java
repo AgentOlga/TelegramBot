@@ -17,6 +17,8 @@ import com.pengrad.telegrambot.model.CallbackQuery;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.PhotoSize;
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
+import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.GetFile;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.GetFileResponse;
@@ -25,10 +27,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.example.telegrambot.constants.ConstantValue.*;
 
@@ -57,6 +65,9 @@ public class UserRequestServiceImpl implements UserRequestService {
     private final ReportRepository reportRepository;
     private final AdopterRepository adopterRepository;
 
+    private final Map<Long, String> stateByUserId = new HashMap<>();
+    private final Map<Long, Integer> reportStateByUserId = new HashMap<>();
+
     public UserRequestServiceImpl(InlineKeyboardMarkupService inlineKeyboardMarkupService,
                                   ReplyKeyboardMarkupService replyKeyboardMarkupService,
                                   TelegramBot telegramBot,
@@ -73,6 +84,20 @@ public class UserRequestServiceImpl implements UserRequestService {
         this.reportService = reportService;
         this.reportRepository = reportRepository;
         this.adopterRepository = adopterRepository;
+    }
+
+    @Override
+    public boolean checkReport(Update update) {
+        if (update.message() == null)
+            return false;
+
+        long userId = update.message().from().id();
+
+        if (stateByUserId.containsKey(userId) && stateByUserId.get(userId) == "WAITING_REPORT") {
+            HandleAdopterReport(update);
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -111,6 +136,51 @@ public class UserRequestServiceImpl implements UserRequestService {
             } else {
                 blockedUser(chatId, userName);
             }
+        }
+    }
+
+    private void HandleAdopterReport(Update update) {
+        Message message = update.message();
+        Long chatId = message.from().id();
+        long userId = update.message().from().id();
+        String text = message.text();
+        Boolean completed = false;
+
+        if (update.message().photo() != null && text != null) {
+            savePhoto(update, chatId);
+            saveReport(update, chatId);
+
+            completed = true;
+        }
+        else if (update.message().photo() != null && text == null) {
+            savePhoto(update, chatId);
+
+            if (!reportStateByUserId.containsKey(userId))
+                reportStateByUserId.put(userId, 1);
+            else if (reportStateByUserId.get(userId) == 100)
+                completed = true;
+
+            String response = "спасибо за фото, нужен еще текст";
+            telegramBot.execute(new SendMessage(chatId, response));
+        }
+        else if (update.message().photo() == null && text != null) {
+            saveReport(update, chatId);
+
+            if (!reportStateByUserId.containsKey(userId))
+                reportStateByUserId.put(userId, 100);
+            else if (reportStateByUserId.get(userId) == 1)
+                completed = true;
+
+            String response = "спасибо за текст, нужнo еще фото";
+            telegramBot.execute(new SendMessage(chatId, response));
+        }
+
+        if (completed) {
+            reportStateByUserId.remove(userId);
+            stateByUserId.remove(userId);
+
+            String response = "спасибо за отчёт, результат проверки узнаете в течении дня";
+            telegramBot.execute(new SendMessage(chatId, response));
         }
     }
 
@@ -194,12 +264,19 @@ public class UserRequestServiceImpl implements UserRequestService {
         }
     }
 
+    private void savePhoto(Update update, long chatId) {
+    }
+
+    private void saveReport(Update update, long chatId) {
+    }
+
     @Override
     public void createButtonClick(Update update) {
 
         CallbackQuery callbackQuery = update.callbackQuery();
         if (callbackQuery != null) {
             long chatId = callbackQuery.message().chat().id();
+            long userId = callbackQuery.message().from().id();
             String data = callbackQuery.data();
             switch (data) {
                 case CLICK_CAT_SHELTER:
@@ -269,8 +346,8 @@ public class UserRequestServiceImpl implements UserRequestService {
                             нужно заполнить анкету:
                             Напишите Ваше Имя, Фамилию, номер телефона(без кода страны), номер машины в формате:
                             Иван Иванов 1234567890 а123аа""");
-                    updateUserInGuestCatShelter(update); //метод вызывается, но пишет, что Cannot invoke "com.pengrad.telegrambot.model.Message.chat()" because "message" is null
 
+                    updateUserInGuestCatShelter(update); //метод вызывается, но пишет, что Cannot invoke "com.pengrad.telegrambot.model.Message.chat()" because "message" is null
                     break;
                 case CLICK_VISIT_DOG:
 
@@ -289,15 +366,14 @@ public class UserRequestServiceImpl implements UserRequestService {
                     break;
                 case CLICK_REPORT_CAT:
                 case CLICK_REPORT_DOG:
-
-                    sendMessage(chatId, """
+                    stateByUserId.put(userId, "WAITING_REPORT");
+                    SendMessage sendMessage = new SendMessage(chatId, """
                             Отправьте отчет о питомце:
                             фото питомца;
                             рацион питомца;
                             общее самочувствие и привыкание к новому мету;
                             изменение в поведении.""");
-                    reportEnter(update); //метод вызывается, но пишет, что Cannot invoke "com.pengrad.telegrambot.model.Message.chat()" because "message" is null
-
+                    sendMessage(sendMessage);
                     break;
             }
         }
