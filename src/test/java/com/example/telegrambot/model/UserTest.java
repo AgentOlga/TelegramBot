@@ -117,7 +117,7 @@ class UserTest {
     @Test
     public void shouldAddUserWithParameters() {
 
-        assertNotNull(user.getUserId());
+        assertNotNull(user.getTelegramId());
         assertNotNull(user.getTelegramNick());
         assertNotNull(user.getUserType());
         assertNotNull(user.getUserStatus());
@@ -126,7 +126,7 @@ class UserTest {
     @Test
     public void shouldAddGuestWithParameters() {
 
-        assertNotNull(guest.getUserId());
+        assertNotNull(guest.getTelegramId());
         assertNotNull(guest.getTelegramNick());
         assertNotNull(guest.getUserType());
         assertNotNull(guest.getUserStatus());
@@ -140,7 +140,7 @@ class UserTest {
     @Test
     public void shouldAddAdopterWithParameters() {
 
-        assertNotNull(adopter.getUserId());
+        assertNotNull(adopter.getTelegramId());
         assertNotNull(adopter.getTelegramNick());
         assertNotNull(adopter.getUserType());
         assertNotNull(adopter.getUserStatus());

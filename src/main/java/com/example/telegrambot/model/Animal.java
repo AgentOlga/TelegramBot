@@ -42,9 +42,41 @@ public class Animal {
     private Sex sex;
 
     public Animal(String nickName, PetType petType, Color color, Sex sex) {
-        this.nickName = nickName;
-        this.petType = petType;
-        this.color = color;
-        this.sex = sex;
+        setNickName(nickName);
+        setPetType(petType);
+        setColor(color);
+        setSex(sex);
+    }
+
+    public void setNickName(String nickName) {
+        if (nickName == null || nickName.isEmpty() || nickName.isBlank()) {
+            throw new RuntimeException("Имя животного введено некорректно!");
+        } else {
+            this.nickName = nickName;
+        }
+    }
+
+    public void setPetType(PetType petType) {
+        if (petType == null) {
+            throw new RuntimeException("Тип животного введен некорректно!");
+        } else {
+            this.petType = petType;
+        }
+    }
+
+    public void setColor(Color color) {
+        if (color == null) {
+            throw new RuntimeException("Цвет животного введен некорректно!");
+        } else {
+            this.color = color;
+        }
+    }
+
+    public void setSex(Sex sex) {
+        if (sex == null) {
+            throw new RuntimeException("Пол животного введен некорректно!");
+        } else {
+            this.sex = sex;
+        }
     }
 }
