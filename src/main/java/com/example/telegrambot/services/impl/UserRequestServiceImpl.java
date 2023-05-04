@@ -12,13 +12,10 @@ import com.example.telegrambot.repository.ReportRepository;
 import com.example.telegrambot.repository.UserRepository;
 import com.example.telegrambot.services.*;
 import com.pengrad.telegrambot.TelegramBot;
-import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.CallbackQuery;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.PhotoSize;
 import com.pengrad.telegrambot.model.Update;
-import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
-import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.GetFile;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.GetFileResponse;
@@ -27,10 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -65,8 +59,7 @@ public class UserRequestServiceImpl implements UserRequestService {
     private final ReportRepository reportRepository;
     private final AdopterRepository adopterRepository;
 
-    private final Map<Long, String> stateByUserId = new HashMap<>();
-    private final Map<Long, Integer> reportStateByUserId = new HashMap<>();
+    private final Map<Long, ReportStatus> reportStateByChatId = new HashMap<>();
 
     public UserRequestServiceImpl(InlineKeyboardMarkupService inlineKeyboardMarkupService,
                                   ReplyKeyboardMarkupService replyKeyboardMarkupService,
@@ -91,9 +84,9 @@ public class UserRequestServiceImpl implements UserRequestService {
         if (update.message() == null)
             return false;
 
-        long userId = update.message().from().id();
+        long chatId = update.message().from().id();
 
-        if (stateByUserId.containsKey(userId) && stateByUserId.get(userId) == "WAITING_REPORT") {
+        if (reportStateByChatId.containsKey(chatId)) {
             HandleAdopterReport(update);
             return true;
         }
@@ -144,44 +137,51 @@ public class UserRequestServiceImpl implements UserRequestService {
         Long chatId = message.from().id();
         long userId = update.message().from().id();
         String text = message.text();
-        Boolean completed = false;
+
+        var reportState = reportStateByChatId.get(chatId);
+        String response = "";
 
         if (update.message().photo() != null && text != null) {
-            savePhoto(update, chatId);
-            saveReport(update, chatId);
+            picture = savePhoto(update, chatId);
+            textReport = text;
+            //saveReport(update, chatId);
 
-            completed = true;
+            reportState = new ReportStatus(true, true);
         }
         else if (update.message().photo() != null && text == null) {
-            savePhoto(update, chatId);
+            picture = savePhoto(update, chatId);
 
-            if (!reportStateByUserId.containsKey(userId))
-                reportStateByUserId.put(userId, 1);
-            else if (reportStateByUserId.get(userId) == 100)
-                completed = true;
-
-            String response = "спасибо за фото, нужен еще текст";
-            telegramBot.execute(new SendMessage(chatId, response));
+            reportState.photo = true;
+            response = "спасибо за фото";
         }
         else if (update.message().photo() == null && text != null) {
-            saveReport(update, chatId);
+            textReport = text;
+            //saveReport(update, chatId);
 
-            if (!reportStateByUserId.containsKey(userId))
-                reportStateByUserId.put(userId, 100);
-            else if (reportStateByUserId.get(userId) == 1)
-                completed = true;
-
-            String response = "спасибо за текст, нужнo еще фото";
-            telegramBot.execute(new SendMessage(chatId, response));
+            reportState.text = true;
+            response = "спасибо за текст";
         }
 
-        if (completed) {
-            reportStateByUserId.remove(userId);
-            stateByUserId.remove(userId);
+        if (reportState.text && reportState.photo) {
+            reportStateByChatId.remove(chatId);
+            response = "спасибо за отчёт, результат проверки узнаете в течении дня";
 
-            String response = "спасибо за отчёт, результат проверки узнаете в течении дня";
-            telegramBot.execute(new SendMessage(chatId, response));
+            User user = userRepository.findByUserId(userId);
+            reportService.saveReport(user, LocalDate.now(), StatusReport.NOT_ACCEPTED, textReport, picture);
         }
+        else
+        {
+            if (!reportState.photo)
+                response += ", нужно еще фото";
+            if (!reportState.text)
+                response += ", нужен еще текст";
+            reportStateByChatId.put(chatId, reportState);
+        }
+
+        var message1 = new SendMessage(chatId, response);
+        if (reportState.text && reportState.photo)
+            message1.replyMarkup(inlineKeyboardMarkupService.createButtonsCatShelterReport());
+        telegramBot.execute(message1);
     }
 
     private void greetingVolunteer(long chatId, String name) {
@@ -264,7 +264,20 @@ public class UserRequestServiceImpl implements UserRequestService {
         }
     }
 
-    private void savePhoto(Update update, long chatId) {
+    private byte[] savePhoto(Update update, long chatId) {
+        Message message = update.message();
+
+        PhotoSize photoSize = message.photo()[message.photo().length - 1];
+        GetFileResponse getFileResponse = telegramBot.execute(new GetFile(photoSize.fileId()));
+
+        byte[] result;
+        try {
+            result = telegramBot.getFileContent(getFileResponse.file());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return result;
     }
 
     private void saveReport(Update update, long chatId) {
@@ -366,7 +379,7 @@ public class UserRequestServiceImpl implements UserRequestService {
                     break;
                 case CLICK_REPORT_CAT:
                 case CLICK_REPORT_DOG:
-                    stateByUserId.put(userId, "WAITING_REPORT");
+                    reportStateByChatId.put(chatId, new ReportStatus(false, false));
                     SendMessage sendMessage = new SendMessage(chatId, """
                             Отправьте отчет о питомце:
                             фото питомца;
@@ -379,6 +392,7 @@ public class UserRequestServiceImpl implements UserRequestService {
         }
     }
 
+    /*
     private void reportEnter(Update update) {
 
         Message message = update.message();
@@ -421,7 +435,7 @@ public class UserRequestServiceImpl implements UserRequestService {
         }
 
         if (report == null) {
-            reportService.saveReport(user,
+            reportService.saveReport(userId,
                     dateReport,
                     statusReport,
                     textReport,
@@ -434,6 +448,7 @@ public class UserRequestServiceImpl implements UserRequestService {
                     picture);
         }
     }
+*/
 
     private void getCheckReport(Update update) {
 
@@ -744,4 +759,14 @@ public class UserRequestServiceImpl implements UserRequestService {
             //sendMessage(sendMessage);
         }
     }*/
+
+    class ReportStatus {
+        boolean photo;
+        boolean text;
+
+        public ReportStatus(boolean photo, boolean text) {
+            this.photo = photo;
+            this.text = text;
+        }
+    }
 }
