@@ -5,14 +5,10 @@ import com.example.telegrambot.constants.StatusReport;
 import com.example.telegrambot.constants.UserStatus;
 import com.example.telegrambot.constants.UserType;
 import com.example.telegrambot.exception.NotFoundReportException;
+import com.example.telegrambot.exception.ValidationException;
 import com.example.telegrambot.listener.TelegramBotUpdatesListener;
-import com.example.telegrambot.model.Dialog;
-import com.example.telegrambot.model.Report;
-import com.example.telegrambot.model.User;
-import com.example.telegrambot.repository.AdopterRepository;
-import com.example.telegrambot.repository.DialogRepository;
-import com.example.telegrambot.repository.ReportRepository;
-import com.example.telegrambot.repository.UserRepository;
+import com.example.telegrambot.model.*;
+import com.example.telegrambot.repository.*;
 import com.example.telegrambot.services.*;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.CallbackQuery;
@@ -44,14 +40,10 @@ public class UserRequestServiceImpl implements UserRequestService {
     private static Report checkReport;
     private static String textReport;
     private static byte[] picture;
-    //    private final Pattern patternName = Pattern
-//            .compile("^[a-zA-Zа-яА-Я]+$");//ALT+Enter -> check
-//    private final Pattern patternPhone = Pattern
-//            .compile("(\\d{10})");//ALT+Enter -> check
-//    private final Pattern patternCar = Pattern
-//            .compile("^[a-zA-Z0-9]+$");//ALT+Enter -> check
-    private final Pattern pattern = Pattern
-            .compile("(^[А-я]+)\\s+([А-я]+)\\s+(\\d{10})\\s+([А-я0-9\\d]+$)");//ALT+Enter -> check
+
+    private final Pattern patternAdopter = Pattern.compile("(^\\d{9})\\s+(\\d{2})\\s+(\\d+$)");//ALT+Enter -> check
+
+    private final Pattern pattern = Pattern.compile("(^[А-я]+)\\s+([А-я]+)\\s+(\\d{10})\\s+([А-я0-9\\d]+$)");//ALT+Enter -> check
     private final InlineKeyboardMarkupService inlineKeyboardMarkupService;
     private final ReplyKeyboardMarkupService replyKeyboardMarkupService;
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
@@ -61,17 +53,17 @@ public class UserRequestServiceImpl implements UserRequestService {
     private final ReportService reportService;
     private final ReportRepository reportRepository;
     private final DialogRepository dialogRepository;
+
+    private final AnimalService animalService;
+
+    private final AnimalRepository animalRepository;
+    private final AdopterService adopterService;
+
     private final AdopterRepository adopterRepository;
 
-    public UserRequestServiceImpl(InlineKeyboardMarkupService inlineKeyboardMarkupService,
-                                  ReplyKeyboardMarkupService replyKeyboardMarkupService,
-                                  TelegramBot telegramBot,
-                                  UserService userService,
-                                  UserRepository userRepository,
-                                  ReportService reportService,
-                                  ReportRepository reportRepository,
-                                  DialogRepository dialogRepository,
-                                  AdopterRepository adopterRepository) {
+    private final ShelterRepository shelterRepository;
+
+    public UserRequestServiceImpl(InlineKeyboardMarkupService inlineKeyboardMarkupService, ReplyKeyboardMarkupService replyKeyboardMarkupService, TelegramBot telegramBot, UserService userService, UserRepository userRepository, ReportService reportService, ReportRepository reportRepository, DialogRepository dialogRepository, AdopterRepository adopterRepository, AnimalService animalService, AnimalRepository animalRepository, AdopterService adopterService, AdopterRepository adopterRepository1, ShelterRepository shelterRepository) {
 
         this.inlineKeyboardMarkupService = inlineKeyboardMarkupService;
         this.replyKeyboardMarkupService = replyKeyboardMarkupService;
@@ -81,7 +73,11 @@ public class UserRequestServiceImpl implements UserRequestService {
         this.reportService = reportService;
         this.reportRepository = reportRepository;
         this.dialogRepository = dialogRepository;
-        this.adopterRepository = adopterRepository;
+        this.animalService = animalService;
+        this.animalRepository = animalRepository;
+        this.adopterService = adopterService;
+        this.adopterRepository = adopterRepository1;
+        this.shelterRepository = shelterRepository;
     }
 
     @Override
@@ -138,8 +134,7 @@ public class UserRequestServiceImpl implements UserRequestService {
     }
 
     private void greetingVolunteer(long chatId, String name) {
-        SendMessage sendMessage =
-                new SendMessage(chatId, String.format(GREETING_VOLUNTEER, name));
+        SendMessage sendMessage = new SendMessage(chatId, String.format(GREETING_VOLUNTEER, name));
 
         sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsVolunteerMenu());
         SendResponse sendResponse = telegramBot.execute(sendMessage);
@@ -149,8 +144,7 @@ public class UserRequestServiceImpl implements UserRequestService {
     }
 
     private void greetingGuest(long chatId, String name) {
-        SendMessage sendMessage =
-                new SendMessage(chatId, String.format(GREETING_GUEST, name));
+        SendMessage sendMessage = new SendMessage(chatId, String.format(GREETING_GUEST, name));
 
         sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsShelterTypeSelect());
         SendResponse sendResponse = telegramBot.execute(sendMessage);
@@ -161,8 +155,7 @@ public class UserRequestServiceImpl implements UserRequestService {
 
     private void greetingAdopterDogShelter(long chatId, String name) {
 
-        SendMessage sendMessage =
-                new SendMessage(chatId, String.format(GREETING_ADOPTER_DOG_SHELTER, name));
+        SendMessage sendMessage = new SendMessage(chatId, String.format(GREETING_ADOPTER_DOG_SHELTER, name));
 
         sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsDogShelterReport());
         SendResponse sendResponse = telegramBot.execute(sendMessage);
@@ -173,8 +166,7 @@ public class UserRequestServiceImpl implements UserRequestService {
 
     private void greetingAdopterCatShelter(long chatId, String name) {
 
-        SendMessage sendMessage =
-                new SendMessage(chatId, String.format(GREETING_ADOPTER_CAT_SHELTER, name));
+        SendMessage sendMessage = new SendMessage(chatId, String.format(GREETING_ADOPTER_CAT_SHELTER, name));
 
         sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsCatShelterReport());
         SendResponse sendResponse = telegramBot.execute(sendMessage);
@@ -184,8 +176,7 @@ public class UserRequestServiceImpl implements UserRequestService {
     }
 
     private void blockedUser(long chatId, String name) {
-        SendMessage sendMessage =
-                new SendMessage(chatId, String.format(NOT_GREETING_USER, name));
+        SendMessage sendMessage = new SendMessage(chatId, String.format(NOT_GREETING_USER, name));
 
         SendResponse sendResponse = telegramBot.execute(sendMessage);
         if (!sendResponse.isOk()) {
@@ -195,8 +186,7 @@ public class UserRequestServiceImpl implements UserRequestService {
 
     private void greetingNotNewUser(Long chatId, String name) {
 
-        SendMessage sendMessage =
-                new SendMessage(chatId, String.format(GREETINGS_NOT_NEW_USER, name));
+        SendMessage sendMessage = new SendMessage(chatId, String.format(GREETINGS_NOT_NEW_USER, name));
 
         sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsShelterTypeSelect());
         SendResponse sendResponse = telegramBot.execute(sendMessage);
@@ -207,8 +197,7 @@ public class UserRequestServiceImpl implements UserRequestService {
 
     private void greetingNewUser(Long chatId, String name) {
 
-        SendMessage sendMessage =
-                new SendMessage(chatId, String.format(GREETINGS_AT_THE_PET_SHELTER, name));
+        SendMessage sendMessage = new SendMessage(chatId, String.format(GREETINGS_AT_THE_PET_SHELTER, name));
 
         sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsShelterTypeSelect());
         SendResponse sendResponse = telegramBot.execute(sendMessage);
@@ -274,6 +263,10 @@ public class UserRequestServiceImpl implements UserRequestService {
 
                     //todo взаимодействие с волонтером
 
+                    break;
+
+                case CLICK_RECORDING_NEW_ANIMAL:
+                    recordingNewAnimals(update);
                     break;
                 case CLICK_ARRANGEMENT_CAT_HOME:
 
@@ -378,8 +371,7 @@ public class UserRequestServiceImpl implements UserRequestService {
 
         LocalDate dateEndOfProbation = LocalDate.now().plusMonths(1);
 
-        reportService.updateDateEndOfProbationById(user,
-                dateEndOfProbation);
+        reportService.updateDateEndOfProbationById(user, dateEndOfProbation);
     }
 
     private void sendExtend14Day() {
@@ -388,19 +380,14 @@ public class UserRequestServiceImpl implements UserRequestService {
 
         LocalDate dateEndOfProbation = LocalDate.now().plusWeeks(2);
 
-        reportService.updateDateEndOfProbationById(user,
-                dateEndOfProbation);
+        reportService.updateDateEndOfProbationById(user, dateEndOfProbation);
     }
 
     private void sendWarningMessage(Update update) {
 
         Message message = update.callbackQuery().message();
         long chatId = message.chat().id();
-        String textMessage = "Дорогой усыновитель, мы заметили, " +
-                "что ты заполняешь отчет не так подробно, как необходимо." +
-                " Пожалуйста, подойди ответственнее к этому занятию. " +
-                "В противном случае волонтеры приюта будут обязаны самолично " +
-                "проверять условия содержания животного";
+        String textMessage = "Дорогой усыновитель, мы заметили, " + "что ты заполняешь отчет не так подробно, как необходимо." + " Пожалуйста, подойди ответственнее к этому занятию. " + "В противном случае волонтеры приюта будут обязаны самолично " + "проверять условия содержания животного";
         long userId = message.from().id();
 
         LocalDate date = LocalDate.now();
@@ -418,8 +405,7 @@ public class UserRequestServiceImpl implements UserRequestService {
 
         StatusReport statusReport = StatusReport.ACCEPTED;
 
-        reportService.updateStatusReportById(user,
-                statusReport);
+        reportService.updateStatusReportById(user, statusReport);
 
     }
 
@@ -428,8 +414,7 @@ public class UserRequestServiceImpl implements UserRequestService {
 
         StatusReport statusReport = StatusReport.NOT_ACCEPTED;
 
-        reportService.updateStatusReportById(user,
-                statusReport);
+        reportService.updateStatusReportById(user, statusReport);
     }
 
     public void getFreeMessage(Update update) {
@@ -479,8 +464,7 @@ public class UserRequestServiceImpl implements UserRequestService {
             sendMessage(chatId, "текст заполнен!");
         } else if (message.photo() != null) {
             PhotoSize photoSize = message.photo()[message.photo().length - 1];
-            GetFileResponse getFileResponse = telegramBot.execute(
-                    new GetFile(photoSize.fileId()));
+            GetFileResponse getFileResponse = telegramBot.execute(new GetFile(photoSize.fileId()));
 
             if (getFileResponse.isOk()) {
                 try {
@@ -493,17 +477,9 @@ public class UserRequestServiceImpl implements UserRequestService {
         }
 
         if (report == null) {
-            reportService.saveReport(user,
-                    dateReport,
-                    statusReport,
-                    textReport,
-                    picture);
+            reportService.saveReport(user, dateReport, statusReport, textReport, picture);
         } else {
-            reportService.updateReportByUserId(user,
-                    dateReport,
-                    statusReport,
-                    textReport,
-                    picture);
+            reportService.updateReportByUserId(user, dateReport, statusReport, textReport, picture);
         }
     }
 
@@ -529,10 +505,7 @@ public class UserRequestServiceImpl implements UserRequestService {
         }
 
         String name = checkReport.getUserId().getFirstName();
-        SendMessage sendMessage =
-                new SendMessage(chatId, "Отчет от " + name +
-                        " , был отправлен " + checkReport.getDateReport() + " :\n" +
-                        checkReport.getReportText() + checkReport.getPicture().toString());
+        SendMessage sendMessage = new SendMessage(chatId, "Отчет от " + name + " , был отправлен " + checkReport.getDateReport() + " :\n" + checkReport.getReportText() + checkReport.getPicture().toString());
 
         sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsCheckReport());
 
@@ -672,15 +645,7 @@ public class UserRequestServiceImpl implements UserRequestService {
                 phoneNumber = matcher.group(3);
                 carNumber = matcher.group(4);
 
-                userService.addGuest(userId,
-                        userName,
-                        userType,
-                        shelterType,
-                        userStatus,
-                        firstName,
-                        lastName,
-                        phoneNumber,
-                        carNumber);
+                userService.addGuest(userId, userName, userType, shelterType, userStatus, firstName, lastName, phoneNumber, carNumber);
 
                 sendMessage(chatId, "Анкета успешно заполнена!");
                 getMainMenuClick(chatId);
@@ -694,7 +659,6 @@ public class UserRequestServiceImpl implements UserRequestService {
     }
 
     public void updateUserInGuestDogShelter(Update update) {
-
         Message message = update.callbackQuery().message();
         Long chatId = message.chat().id();
         String text = message.text();
@@ -725,15 +689,7 @@ public class UserRequestServiceImpl implements UserRequestService {
                 phoneNumber = matcher.group(3);
                 carNumber = matcher.group(4);
 
-                userService.addGuest(userId,
-                        userName,
-                        userType,
-                        shelterType,
-                        userStatus,
-                        firstName,
-                        lastName,
-                        phoneNumber,
-                        carNumber);
+                userService.addGuest(userId, userName, userType, shelterType, userStatus, firstName, lastName, phoneNumber, carNumber);
 
                 sendMessage(chatId, "Анкета успешно заполнена!");
                 getMainMenuClick(chatId);
@@ -758,6 +714,51 @@ public class UserRequestServiceImpl implements UserRequestService {
         SendResponse sendResponse = telegramBot.execute(sendMessage);
         if (!sendResponse.isOk()) {
             logger.error("Error during sending message: {}", sendResponse.description());
+        }
+    }
+
+    private void recordingNewAnimals(Update update) {
+
+
+        Message message = update.message();
+        String text = message.text();
+        long chatId = message.chat().id();
+        long telegramId;
+        long animalID;
+        long shelterID;
+
+        sendMessage(chatId, """
+                Чтобы записать усыновителя,
+                нужно заполнить форму:
+                Напишите  chatId, userId, animal, shelter""");
+
+        if (text != null) {
+            Matcher matcher = patternAdopter.matcher(text);
+            if (matcher.find()) {
+
+                telegramId = Long.parseLong(matcher.group(1));
+                animalID = Long.parseLong(matcher.group(2));
+                shelterID = Long.parseLong(matcher.group(3));
+
+                User userId = userService.findUserByTelegramId(telegramId);
+                Animal animalId = animalRepository.getReferenceById(animalID);
+                Shelter shelterId = shelterRepository.getReferenceById(shelterID);
+
+                Adopter adopter = new Adopter(userId, animalId, shelterId);
+                Adopter adopterOne = adopterRepository.findAdopterByUserId(userId);
+
+                if (adopterOne == null) {
+                    adopterRepository.save(adopter);
+                    sendMessage(chatId, "усыновитель добавлен");
+                } else {
+                    sendMessage(chatId, "усыновитель уже есть в БД");
+                    throw new ValidationException("");
+                }
+                getMainMenuClick(chatId);
+
+            } else {
+                sendMessage(chatId, "некорректно введены данные");
+            }
         }
     }
 

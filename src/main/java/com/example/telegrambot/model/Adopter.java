@@ -34,4 +34,9 @@ public class Adopter {
     @JoinColumn(name = "shelter_id")
     private Shelter shelter;
 
+    public Adopter(User user, Animal animal, Shelter shelter) {
+        this.user = user;
+        this.animal = animal;
+        this.shelter = shelter;
+    }
 }

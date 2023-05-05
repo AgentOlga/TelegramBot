@@ -7,6 +7,8 @@ import com.example.telegrambot.model.Animal;
 import com.example.telegrambot.model.Shelter;
 import com.example.telegrambot.model.User;
 import com.example.telegrambot.repository.AdopterRepository;
+import com.example.telegrambot.repository.AnimalRepository;
+import com.example.telegrambot.repository.UserRepository;
 import com.example.telegrambot.services.AdopterService;
 import com.example.telegrambot.services.ValidationService;
 import org.springframework.stereotype.Service;
@@ -21,10 +23,16 @@ import java.util.Collection;
 public class AdopterServiceImpl implements AdopterService {
 
     private final AdopterRepository adopterRepository;
+    private final UserRepository userRepository;
+    private final AnimalRepository animalRepository;
+
     private final ValidationService validationService;
 
-    public AdopterServiceImpl(AdopterRepository adopterRepository, ValidationService validationService) {
+    public AdopterServiceImpl(AdopterRepository adopterRepository, UserRepository userRepository, AnimalRepository animalRepository, ValidationService validationService) {
         this.adopterRepository = adopterRepository;
+        this.userRepository = userRepository;
+        this.animalRepository = animalRepository;
+
         this.validationService = validationService;
     }
 
@@ -35,7 +43,6 @@ public class AdopterServiceImpl implements AdopterService {
         }
         return adopterRepository.save(adopter);
     }
-
     @Override
     @Transactional
     public void updateAdopterById(Long id,

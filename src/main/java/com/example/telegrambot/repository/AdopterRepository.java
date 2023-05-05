@@ -1,10 +1,7 @@
 package com.example.telegrambot.repository;
 
 import com.example.telegrambot.constants.*;
-import com.example.telegrambot.model.Adopter;
-import com.example.telegrambot.model.Animal;
-import com.example.telegrambot.model.Shelter;
-import com.example.telegrambot.model.User;
+import com.example.telegrambot.model.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -26,4 +23,7 @@ public interface AdopterRepository extends JpaRepository<Adopter, Long> {
             @Param("user_id") User user,
             @Param("animal_id") Animal animal,
             @Param("shelter_id") Shelter shelter);
+
+    @Query("SELECT a FROM Adopter a WHERE a.user = :user_id")
+    Adopter findAdopterByUserId(@Param("user_id") User user);
 }
