@@ -21,4 +21,6 @@ public interface UserRequestService {
      * @param update информация от пользователя
      */
     void createButtonClick(Update update);
+
+    boolean checkReport(Update update);
 }

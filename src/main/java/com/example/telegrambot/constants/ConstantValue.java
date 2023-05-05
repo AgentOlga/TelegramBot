@@ -156,4 +156,10 @@ public class ConstantValue {
     public static final String CLICK_FREE_MESSAGE= "CLICK_FREE_MESSAGE";
     public static final String CLICK_OK = "CLICK_OK";
     public static final String CLICK_NOT_OK = "CLICK_NOT_OK";
+
+
+    public static final String CLICK_REPORT_RULES = "CLICK_REPORT_RULES";
+    public static final String CLICK_SEND_REPORT = "CLICK_SEND_REPORT";
+    public static final String CLICK_CALL_VOLUNTEER = "CLICK_CALL_VOLUNTEER";
+    public static final String CLICK_REPORT_BACK = "CLICK_REPORT_BACK";
 }
