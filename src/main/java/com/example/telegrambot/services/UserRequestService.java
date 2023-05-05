@@ -10,11 +10,12 @@ public interface UserRequestService {
 
     boolean checkReport(Update update);
 
+    boolean checkAdopter(Update update);
+
     boolean checkUserInGuestCat(Update update);
 
     boolean checkUserInGuestDog(Update update);
 
-    boolean checkFreeMessage(Update update);
 
     /**
      * Отправление приветственного сообщения пользователю.

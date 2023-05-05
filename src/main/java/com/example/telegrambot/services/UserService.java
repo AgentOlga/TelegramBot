@@ -89,4 +89,5 @@ public interface UserService {
     Collection<User> getAllUser();
 
 
+    void updateStatusUserById(Long id, UserStatus userStatus);
 }

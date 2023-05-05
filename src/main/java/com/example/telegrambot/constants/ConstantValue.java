@@ -147,7 +147,6 @@ public class ConstantValue {
      */
 
     public static final String BUTTON_USER_MENU = "Меню пользователя";
-
     public static final String BUTTON_RECORDING_NEW_ANIMAL = "Добавить усыновителя";
     public static final String BUTTON_CHECK_REPORT = "Проверить отчет";
     public static final String BUTTON_FREE_MESSAGE = "Свободное сообщение";
@@ -157,6 +156,7 @@ public class ConstantValue {
     public static final String BUTTON_EXTEND = "Продлить испытательный срок";
     public static final String BUTTON_EXTEND_14_DAY = "Продлить на 14 дней";
     public static final String BUTTON_EXTEND_30_DAY = "Продлить на 30 дней";
+    public static final String BUTTON_DELETE_ADOPTER = "Испытательный срок не пройден";
 
     /**
      * Текст под кнопками ВОЛОНТЕРОВ- callbackQuery.data().
@@ -171,4 +171,5 @@ public class ConstantValue {
     public static final String CLICK_EXTEND = "CLICK_EXTEND";
     public static final String CLICK_EXTEND_14_DAY = "CLICK_EXTEND_14_DAY";
     public static final String CLICK_EXTEND_30_DAY = "CLICK_EXTEND_30_DAY";
+    public static final String CLICK_DELETE_ADOPTER = "CLICK_DELETE_ADOPTER";
 }

@@ -1,13 +1,7 @@
 package com.example.telegrambot.listener;
 
-
-import com.example.telegrambot.repository.ReportRepository;
-import com.example.telegrambot.repository.UserRepository;
-import com.example.telegrambot.services.ReportService;
 import com.example.telegrambot.services.UserRequestService;
 
-import com.example.telegrambot.services.UserService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 
@@ -18,11 +12,7 @@ import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-//import javax.annotation.PostConstruct;
 import java.util.List;
-import java.util.regex.Pattern;
-
 
 /**
  * Объект, уведомляемый о событии.
@@ -61,15 +51,15 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                     return;
                 }
 
+                if (userRequestService.checkAdopter(update)) {
+                    return;
+                }
+
                 if (userRequestService.checkUserInGuestCat(update)) {
                     return;
                 }
 
                 if (userRequestService.checkUserInGuestDog(update)) {
-                    return;
-                }
-
-                if (userRequestService.checkFreeMessage(update)) {
                     return;
                 }
 
