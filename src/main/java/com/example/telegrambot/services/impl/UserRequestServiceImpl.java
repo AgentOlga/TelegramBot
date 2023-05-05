@@ -29,7 +29,9 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,12 +46,6 @@ public class UserRequestServiceImpl implements UserRequestService {
     private static Report checkReport;
     private static String textReport;
     private static byte[] picture;
-    //    private final Pattern patternName = Pattern
-//            .compile("^[a-zA-Zа-яА-Я]+$");//ALT+Enter -> check
-//    private final Pattern patternPhone = Pattern
-//            .compile("(\\d{10})");//ALT+Enter -> check
-//    private final Pattern patternCar = Pattern
-//            .compile("^[a-zA-Z0-9]+$");//ALT+Enter -> check
     private final Pattern pattern = Pattern
             .compile("(^[А-я]+)\\s+([А-я]+)\\s+(\\d{10})\\s+([А-я0-9\\d]+$)");//ALT+Enter -> check
     private final InlineKeyboardMarkupService inlineKeyboardMarkupService;
@@ -62,6 +58,10 @@ public class UserRequestServiceImpl implements UserRequestService {
     private final ReportRepository reportRepository;
     private final DialogRepository dialogRepository;
     private final AdopterRepository adopterRepository;
+    private final Map<Long, UserType> reportStateByChatId = new HashMap<>();
+    private final Map<Long, UserType> userCatStateByChatId = new HashMap<>();
+    private final Map<Long, UserType> userDogStateByChatId = new HashMap<>();
+    private final Map<Long, UserType> messageStateByChatId = new HashMap<>();
 
     public UserRequestServiceImpl(InlineKeyboardMarkupService inlineKeyboardMarkupService,
                                   ReplyKeyboardMarkupService replyKeyboardMarkupService,
@@ -85,21 +85,134 @@ public class UserRequestServiceImpl implements UserRequestService {
     }
 
     @Override
+    public boolean checkReport(Update update) {
+        if (update.message() == null)
+            return false;
+
+        long chatId = update.message().from().id();
+
+        if (reportStateByChatId.containsKey(chatId)) {
+            handleAdopterReport(update);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean checkUserInGuestCat(Update update) {
+        if (update.message() == null)
+            return false;
+
+        long chatId = update.message().from().id();
+
+        if (userCatStateByChatId.containsKey(chatId)) {
+            updateUserInGuestCatShelter(update);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean checkUserInGuestDog(Update update) {
+        if (update.message() == null)
+            return false;
+
+        long chatId = update.message().from().id();
+
+        if (userDogStateByChatId.containsKey(chatId)) {
+            updateUserInGuestDogShelter(update);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean checkFreeMessage(Update update) {
+        if (update.message() == null)
+            return false;
+
+        long chatId = update.message().from().id();
+
+        if (messageStateByChatId.containsKey(chatId)) {
+            getFreeMessage(update);
+            return true;
+        }
+        return false;
+    }
+
+    private void handleAdopterReport(Update update) {
+        Message message = update.message();
+        Long chatId = message.from().id();
+        long userId = update.message().from().id();
+        String text = message.text();
+
+        User user = userRepository.findByTelegramId(userId);
+        Report report = reportRepository.findReportByUserId(user);
+        LocalDate dateReport = LocalDate.now();
+        StatusReport statusReport = StatusReport.DEFAULT;
+
+        if (update.message().photo() == null && text != null) {
+            textReport = text;
+            sendMessage(chatId, "текст заполнен!");
+        } else if (update.message().photo() != null && text == null) {
+            PhotoSize photoSize = message.photo()[message.photo().length - 1];
+            GetFileResponse getFileResponse = telegramBot.execute(
+                    new GetFile(photoSize.fileId()));
+
+            if (getFileResponse.isOk()) {
+                try {
+                    picture = telegramBot.getFileContent(getFileResponse.file());
+                    sendMessage(chatId, "фото отправлено!");
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
+        if (report == null) {
+            reportService.saveReport(user,
+                    dateReport,
+                    statusReport,
+                    textReport,
+                    picture);
+        } else {
+            reportService.updateReportByUserId(user,
+                    dateReport,
+                    statusReport,
+                    textReport,
+                    picture);
+        }
+
+        if (textReport != null && picture != null) {
+            SendMessage message1 = new SendMessage(chatId, "Спасибо за полный отчёт," +
+                    " результат проверки узнаете в течении дня!");
+            message1.replyMarkup(inlineKeyboardMarkupService.createButtonsCatShelterReport());
+            telegramBot.execute(message1);
+
+        } else if (textReport == null || picture == null) {
+            SendMessage message1 = new SendMessage(chatId, "Спасибо за отчёт! К сожалению, он не полный, " +
+                    "поэтому мы настоятельно рекомендуем прислать полный отчет, чтобы избежать последствий!");
+            message1.replyMarkup(inlineKeyboardMarkupService.createButtonsCatShelterReport());
+            telegramBot.execute(message1);
+        }
+    }
+
+    @Override
     public void sendMessageStart(Update update) {
 
         Message message = update.message();
         Long chatId = message.from().id();
         String text = message.text();
         String userName = update.message().from().firstName();
-        long userId = update.message().from().id();
+        long telegramId = update.message().from().id();
 
         if ("/start".equals(text)) {
 
-            User user = userService.findUserByTelegramId(userId);
+            User user = userService.findUserByTelegramId(telegramId);
 
             if (user == null) {
                 greetingNewUser(chatId, userName);
-                userService.addUser(userId, userName, UserType.DEFAULT, UserStatus.APPROVE);
+                userService.addUser(telegramId, userName, UserType.DEFAULT, UserStatus.APPROVE);
 
             } else if (user.getUserType() == UserType.DEFAULT && user.getUserStatus() == UserStatus.APPROVE) {
                 greetingNotNewUser(chatId, userName);
@@ -108,6 +221,13 @@ public class UserRequestServiceImpl implements UserRequestService {
                 greetingGuest(chatId, userName);
 
             } else if (user.getUserType() == UserType.ADOPTER && user.getUserStatus() == UserStatus.APPROVE) {
+
+                Report report = reportRepository.findReportByUserId(user);
+                if (report.getDateEndOfProbation() == LocalDate.now()) {
+                    sendMessage(chatId, "Поздравляем, Вы прошли испытательный срок!");
+                    userRepository.delete(user);
+                }
+
                 if (user.getShelterType() == ShelterType.CAT_SHELTER) {
                     List<Dialog> dialogList = dialogRepository.findAll().stream().toList();
 
@@ -117,6 +237,7 @@ public class UserRequestServiceImpl implements UserRequestService {
                         }
                     }
                     greetingAdopterCatShelter(chatId, userName);
+
                 } else if (user.getShelterType() == ShelterType.DOG_SHELTER) {
                     List<Dialog> dialogList = dialogRepository.findAll().stream().toList();
 
@@ -224,6 +345,7 @@ public class UserRequestServiceImpl implements UserRequestService {
         if (callbackQuery != null) {
             long chatId = callbackQuery.message().chat().id();
             String data = callbackQuery.data();
+            long userId = callbackQuery.message().from().id();
             switch (data) {
                 case CLICK_CAT_SHELTER:
 
@@ -287,19 +409,26 @@ public class UserRequestServiceImpl implements UserRequestService {
                     break;
                 case CLICK_VISIT_CAT:
 
-                    sendMessage(chatId, """
+                    userCatStateByChatId.put(chatId, UserType.GUEST);
+                    SendMessage sendMessage = new SendMessage(chatId, """
                             Чтобы записаться на посещение,
                             нужно заполнить анкету:
                             Напишите Ваше Имя, Фамилию, номер телефона(без кода страны), номер машины в формате:
                             Иван Иванов 1234567890 а123аа""");
-                    updateUserInGuestCatShelter(update); //метод вызывается, но пишет, что Cannot invoke "com.pengrad.telegrambot.model.Message.chat()" because "message" is null
+                    sendMessage(sendMessage);
 
                     break;
                 case CLICK_VISIT_DOG:
 
-                    updateUserInGuestDogShelter(update); //метод вызывается, но пишет, что Cannot invoke "com.pengrad.telegrambot.model.Message.chat()" because "message" is null
-
+                    userDogStateByChatId.put(chatId, UserType.GUEST);
+                    SendMessage sendMessage5 = new SendMessage(chatId, """
+                            Чтобы записаться на посещение,
+                            нужно заполнить анкету:
+                            Напишите Ваше Имя, Фамилию, номер телефона(без кода страны), номер машины в формате:
+                            Иван Иванов 1234567890 а123аа""");
+                    sendMessage(sendMessage5);
                     break;
+
                 case CLICK_CHECK_REPORT:
 
                     getCheckReport(update);
@@ -307,19 +436,20 @@ public class UserRequestServiceImpl implements UserRequestService {
                     break;
                 case CLICK_FREE_MESSAGE:
 
-                    getFreeMessage(update);
+                    messageStateByChatId.put(chatId, UserType.VOLUNTEER);
 
                     break;
                 case CLICK_REPORT_CAT:
                 case CLICK_REPORT_DOG:
 
-                    sendMessage(chatId, """
+                    reportStateByChatId.put(chatId, UserType.ADOPTER);
+                    SendMessage sendMessage1 = new SendMessage(chatId, """
                             Отправьте отчет о питомце:
                             фото питомца;
                             рацион питомца;
                             общее самочувствие и привыкание к новому мету;
                             изменение в поведении.""");
-                    reportEnter(update); //метод вызывается, но пишет, что Cannot invoke "com.pengrad.telegrambot.model.Message.chat()" because "message" is null
+                    sendMessage(sendMessage1);
 
                     break;
                 case CLICK_OK:
@@ -331,22 +461,22 @@ public class UserRequestServiceImpl implements UserRequestService {
                     break;
                 case CLICK_NOT_OK:
 
-//                    checkReportStatusNotOk();
+                    checkReportStatusNotOk();
 
-                    SendMessage sendMessage = new SendMessage(chatId, "отчет не принят!");
+                    SendMessage sendMessage2 = new SendMessage(chatId, "отчет не принят!");
 
-                    sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsCheckReportNotOk());
+                    sendMessage2.replyMarkup(inlineKeyboardMarkupService.createButtonsCheckReportNotOk());
 
-                    sendMessage(sendMessage);
+                    sendMessage(sendMessage2);
 
                     break;
                 case CLICK_EXTEND:
 
-                    SendMessage sendMessage1 = new SendMessage(chatId, "На сколько продлить испытательный срок?");
+                    SendMessage sendMessage3 = new SendMessage(chatId, "На сколько продлить испытательный срок?");
 
-                    sendMessage1.replyMarkup(inlineKeyboardMarkupService.createButtonsCheckReportNotOkExtend());
+                    sendMessage3.replyMarkup(inlineKeyboardMarkupService.createButtonsCheckReportNotOkExtend());
 
-                    sendMessage(sendMessage1);
+                    sendMessage(sendMessage3);
 
                     break;
                 case CLICK_WARNING_REPORT:
@@ -380,6 +510,11 @@ public class UserRequestServiceImpl implements UserRequestService {
 
         reportService.updateDateEndOfProbationById(user,
                 dateEndOfProbation);
+
+        Dialog dialog =
+                new Dialog(user, null, "Испытательный срок продлен на 30 дней!", LocalDate.now());
+
+        dialogRepository.save(dialog);
     }
 
     private void sendExtend14Day() {
@@ -390,6 +525,11 @@ public class UserRequestServiceImpl implements UserRequestService {
 
         reportService.updateDateEndOfProbationById(user,
                 dateEndOfProbation);
+
+        Dialog dialog =
+                new Dialog(user, null, "Испытательный срок продлен на 14 дней!", LocalDate.now());
+
+        dialogRepository.save(dialog);
     }
 
     private void sendWarningMessage(Update update) {
@@ -434,77 +574,25 @@ public class UserRequestServiceImpl implements UserRequestService {
 
     public void getFreeMessage(Update update) {
 
-        /*Message message = update.callbackQuery().message();
+        Message message = update.message();
         long chatId = message.chat().id();
         String text = message.text();
         String textMessage;
         long userId = message.from().id();
 
-        if (text != null) {
-            textMessage = text;
-            LocalDate date = LocalDate.now();
+        LocalDate date = LocalDate.now();
 
-            User guest = checkReport.getUserId();
-            User volunteer = userService.findUserByUserId(userId);
+        User guest = checkReport.getUserId();
+        User volunteer = userService.findUserByTelegramId(userId);
 
-            Dialog dialog = new Dialog(guest, volunteer, textMessage, date);
+        Dialog dialog = new Dialog(guest, volunteer, "Напишите волонтеру " + volunteer.getTelegramId() + " " +
+                "" + volunteer.getFirstName() + " в личном сообщении!", date);
 
-            dialogRepository.save(dialog);
+        dialogRepository.save(dialog);
 
-            sendMessage(chatId, "Сообщение отправлено!");
-        }*/
-    }
+        sendMessage(chatId, "Напишите пользователю " + guest.getTelegramId() + " " +
+                "" + guest.getFirstName() + " в личном сообщении!");
 
-    private void reportEnter(Update update) {
-
-        Message message = update.message();
-        long chatId = message.chat().id();
-        String text = message.text();
-        long userId = message.from().id();
-
-        User user = userRepository.findByTelegramId(userId);
-        Report report = reportRepository.findReportByUserId(user);
-//        String textReport;
-//        byte[] picture;
-        LocalDate dateReport = LocalDate.now();
-//        LocalDate dateEndOfProbation = null;
-
-        StatusReport statusReport = StatusReport.DEFAULT;
-
-        Dialog dialog = dialogRepository.findDialogByUserId(user);
-        dialogRepository.delete(dialog);
-
-        if (text != null) {
-            textReport = text;
-            sendMessage(chatId, "текст заполнен!");
-        } else if (message.photo() != null) {
-            PhotoSize photoSize = message.photo()[message.photo().length - 1];
-            GetFileResponse getFileResponse = telegramBot.execute(
-                    new GetFile(photoSize.fileId()));
-
-            if (getFileResponse.isOk()) {
-                try {
-                    picture = telegramBot.getFileContent(getFileResponse.file());
-                    sendMessage(chatId, "фото отправлено!");
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-
-        if (report == null) {
-            reportService.saveReport(user,
-                    dateReport,
-                    statusReport,
-                    textReport,
-                    picture);
-        } else {
-            reportService.updateReportByUserId(user,
-                    dateReport,
-                    statusReport,
-                    textReport,
-                    picture);
-        }
     }
 
     private void getCheckReport(Update update) {
@@ -528,11 +616,12 @@ public class UserRequestServiceImpl implements UserRequestService {
             throw new NotFoundReportException("Отчетов нет!");
         }
 
-        String name = checkReport.getUserId().getFirstName();
+        String name = checkReport.getUserId().getTelegramNick();
         SendMessage sendMessage =
                 new SendMessage(chatId, "Отчет от " + name +
-                        " , был отправлен " + checkReport.getDateReport() + " :\n" +
-                        checkReport.getReportText() + checkReport.getPicture().toString());
+                        ", был отправлен " + checkReport.getDateReport() + " :\n" +
+                        "отчет: " + checkReport.getReportText() + "\n" +
+                        "фото: " + checkReport.getPicture().toString());
 
         sendMessage.replyMarkup(inlineKeyboardMarkupService.createButtonsCheckReport());
 
@@ -637,8 +726,6 @@ public class UserRequestServiceImpl implements UserRequestService {
 
     public void updateUserInGuestCatShelter(Update update) {
 
-        logger.info("Handles update: {}", update);
-
         Message message = update.message();
         long chatId = message.chat().id();
         String text = message.text();
@@ -653,15 +740,6 @@ public class UserRequestServiceImpl implements UserRequestService {
         UserType userType = UserType.GUEST;
         UserStatus userStatus = UserStatus.APPROVE;
 
-//        if ("Выберете, пожалуйста, вариант из предложенного меню!".equals(text)) {
-
-//            sendMessage(chatId, """
-//                    Чтобы записаться на посещение,
-//                    нужно заполнить анкету:
-//                    Напишите Ваше Имя, Фамилию, номер телефона(без кода страны), номер машины в формате:
-//                    Иван Иванов 1234567890 а123аа""");
-
-
         if (text != null) {
 
             Matcher matcher = pattern.matcher(text);
@@ -683,20 +761,18 @@ public class UserRequestServiceImpl implements UserRequestService {
                         carNumber);
 
                 sendMessage(chatId, "Анкета успешно заполнена!");
-                getMainMenuClick(chatId);
+                greetingGuest(chatId, userName);
 
             } else {
                 sendMessage(chatId, "Некорректный формат!");
             }
         }
-
-
     }
 
     public void updateUserInGuestDogShelter(Update update) {
 
-        Message message = update.callbackQuery().message();
-        Long chatId = message.chat().id();
+        Message message = update.message();
+        long chatId = message.chat().id();
         String text = message.text();
         long userId = message.from().id();
         String userName = message.from().firstName();
@@ -709,12 +785,6 @@ public class UserRequestServiceImpl implements UserRequestService {
         UserType userType = UserType.GUEST;
         UserStatus userStatus = UserStatus.APPROVE;
 
-        sendMessage(chatId, """
-                Чтобы записаться на посещение,
-                нужно заполнить анкету:
-                Напишите Ваше Имя, Фамилию, номер телефона(без кода страны), номер машины в формате:
-                Иван Иванов 1234567890 а123аа""");
-
         if (text != null) {
 
             Matcher matcher = pattern.matcher(text);
@@ -736,20 +806,12 @@ public class UserRequestServiceImpl implements UserRequestService {
                         carNumber);
 
                 sendMessage(chatId, "Анкета успешно заполнена!");
-                getMainMenuClick(chatId);
+                greetingGuest(chatId, userName);
 
             } else {
                 sendMessage(chatId, "Некорректный формат!");
             }
         }
-    }
-
-    private void getMenu(long chatId) {
-
-        SendMessage sendMessage = new SendMessage(chatId, "");
-        sendMessage.replyMarkup(replyKeyboardMarkupService.createStart());
-
-        sendMessage(sendMessage);
     }
 
     private void sendMessage(long chatId, String message) {
@@ -760,83 +822,4 @@ public class UserRequestServiceImpl implements UserRequestService {
             logger.error("Error during sending message: {}", sendResponse.description());
         }
     }
-
-
-    /*public void updateUserInGuest(Update update, long chatId) {
-
-        Message message = update.message();
-
-        String text = message.text();
-
-        String firstName = null;
-        String lastName = null;
-        String phoneNumber = null;
-        String carNumber = null;
-
-        sendMessage(chatId, "Чтобы записаться на посещение,\n" +
-                "нужно заполнить анкету:\n" +
-                "Напишите Ваше имя");
-
-        if (text != null) {
-            Matcher matcher = patternName.matcher(text);
-            if (matcher.find()) {
-                firstName = text;
-
-                sendMessage(chatId,
-                        "Напишите Вашу фамилию");
-
-                if (text != null) {
-                    Matcher matcher1 = patternName.matcher(text);
-                    if (matcher1.find()) {
-                        lastName = text;
-
-                        sendMessage(chatId,
-                                "Напишите Ваш номер телефона без кода страны в формате: XXXХХХХХХХ");
-
-                        if (text != null) {
-                            Matcher matcher2 = patternPhone.matcher(text);
-                            if (matcher2.find()) {
-                                phoneNumber = '7' + text;
-
-                                sendMessage(chatId,
-                                        "Напишите номер Вашей машины.");
-
-                                if (text != null) {
-                                    Matcher matcher3 = patternCar.matcher(text);
-                                    if (matcher3.find()) {
-                                        carNumber = text;
-                                        long userId = update.message().from().id();
-
-                                        userRepository.updateUserInGuestById(userId,
-                                                firstName,
-                                                lastName,
-                                                phoneNumber,
-                                                carNumber,
-                                                UserType.GUEST,
-                                                UserStatus.APPROVE);
-
-                                        sendMessage(chatId, "Анкета успешно заполнена!");
-                                        getMainMenuClick(chatId);
-                                    } else {
-                                        sendMessage(chatId, "Номер введен некорректно!");
-                                    }
-                                    //sendMessage(sendMessage3);
-                                }
-
-                            } else {
-                                sendMessage(chatId, "Номер телефона введен некорректно!");
-                            }
-                            //sendMessage(sendMessage2);
-                        } else {
-                            sendMessage(chatId, "Некорректный формат фамилии!");
-                        }
-                    }
-                    //sendMessage(sendMessage1);
-                } else {
-                    sendMessage(chatId, "Некорректный формат имени!");
-                }
-            }
-            //sendMessage(sendMessage);
-        }
-    }*/
 }
