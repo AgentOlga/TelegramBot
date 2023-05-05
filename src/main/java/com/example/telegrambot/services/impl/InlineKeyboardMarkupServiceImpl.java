@@ -212,10 +212,6 @@ public class InlineKeyboardMarkupServiceImpl implements InlineKeyboardMarkupServ
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         inlineKeyboardMarkup.addRow(new InlineKeyboardButton(BUTTON_USER_MENU)
                 .callbackData(CLICK_BACK_TO_SHELTER_TYPE));
-        inlineKeyboardMarkup.addRow(new InlineKeyboardButton(BUTTON_THE_VOLUNTEER_WALKED_AWAY)
-                .callbackData(CLICK_THE_VOLUNTEER_WALKED_AWAY));
-        inlineKeyboardMarkup.addRow(new InlineKeyboardButton(BUTTON_THE_VOLUNTEER_ACTIVE)
-                .callbackData(CLICK_THE_VOLUNTEER_ACTIVE));
         inlineKeyboardMarkup.addRow(new InlineKeyboardButton(BUTTON_RECORDING_NEW_ANIMAL)
                 .callbackData(CLICK_RECORDING_NEW_ANIMAL));
         inlineKeyboardMarkup.addRow(new InlineKeyboardButton(BUTTON_CHECK_REPORT)

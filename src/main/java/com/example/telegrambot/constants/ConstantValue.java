@@ -147,9 +147,8 @@ public class ConstantValue {
      */
 
     public static final String BUTTON_USER_MENU = "Меню пользователя";
-    public static final String BUTTON_THE_VOLUNTEER_WALKED_AWAY = "Отошел";
-    public static final String BUTTON_THE_VOLUNTEER_ACTIVE = "Активен";
-    public static final String BUTTON_RECORDING_NEW_ANIMAL = "Запись нового животного";
+
+    public static final String BUTTON_RECORDING_NEW_ANIMAL = "Добавить усыновителя";
     public static final String BUTTON_CHECK_REPORT = "Проверить отчет";
     public static final String BUTTON_FREE_MESSAGE = "Свободное сообщение";
     public static final String BUTTON_OK = "Отчет в порядке";
@@ -163,8 +162,6 @@ public class ConstantValue {
      * Текст под кнопками ВОЛОНТЕРОВ- callbackQuery.data().
      */
 
-    public static final String CLICK_THE_VOLUNTEER_WALKED_AWAY = "Отошел";
-    public static final String CLICK_THE_VOLUNTEER_ACTIVE = "Активен";
     public static final String CLICK_RECORDING_NEW_ANIMAL = "CLICK_RECORDING_NEW_ANIMAL";
     public static final String CLICK_CHECK_REPORT = "CLICK_CHECK_REPORT";
     public static final String CLICK_FREE_MESSAGE = "CLICK_FREE_MESSAGE";
