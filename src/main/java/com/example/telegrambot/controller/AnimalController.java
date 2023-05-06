@@ -135,7 +135,7 @@ public class AnimalController {
             responseCode = "500",
             description = "Произошла ошибка, не зависящая от вызывающей стороны"
     )
-    public ResponseEntity<Collection<Animal>> getAllAdopter() {
+    public ResponseEntity<Collection<Animal>> getAllAnimal() {
 
         try {
             return ResponseEntity.ok(animalService.getAllAnimal());
