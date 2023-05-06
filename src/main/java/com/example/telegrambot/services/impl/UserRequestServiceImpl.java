@@ -46,7 +46,6 @@ public class UserRequestServiceImpl implements UserRequestService {
     private final Pattern pattern = Pattern
             .compile("(^[А-я]+)\\s+([А-я]+)\\s+(\\d{10})\\s+([А-я0-9\\d]+$)");//ALT+Enter -> check
     private final InlineKeyboardMarkupService inlineKeyboardMarkupService;
-    private final ReplyKeyboardMarkupService replyKeyboardMarkupService;
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
     private final TelegramBot telegramBot;
     private final UserService userService;
@@ -67,7 +66,6 @@ public class UserRequestServiceImpl implements UserRequestService {
     private final ShelterRepository shelterRepository;
 
     public UserRequestServiceImpl(InlineKeyboardMarkupService inlineKeyboardMarkupService,
-                                  ReplyKeyboardMarkupService replyKeyboardMarkupService,
                                   TelegramBot telegramBot,
                                   UserService userService,
                                   UserRepository userRepository,
@@ -82,7 +80,6 @@ public class UserRequestServiceImpl implements UserRequestService {
                                   ShelterRepository shelterRepository) {
 
         this.inlineKeyboardMarkupService = inlineKeyboardMarkupService;
-        this.replyKeyboardMarkupService = replyKeyboardMarkupService;
         this.telegramBot = telegramBot;
         this.userService = userService;
         this.userRepository = userRepository;
@@ -360,7 +357,7 @@ public class UserRequestServiceImpl implements UserRequestService {
         }
     }
 
-    private void greetingNewUser(Long chatId, String name) {
+    public void greetingNewUser(Long chatId, String name) {
 
         SendMessage sendMessage =
                 new SendMessage(chatId, String.format(GREETINGS_AT_THE_PET_SHELTER, name));
