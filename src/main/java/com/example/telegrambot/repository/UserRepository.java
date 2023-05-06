@@ -1,6 +1,7 @@
 package com.example.telegrambot.repository;
 
 import com.example.telegrambot.constants.ShelterType;
+import com.example.telegrambot.constants.StatusReport;
 import com.example.telegrambot.constants.UserStatus;
 import com.example.telegrambot.constants.UserType;
 import com.example.telegrambot.model.User;
@@ -87,4 +88,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
                                   @Param("user_status") UserStatus userStatus,
                                   @Param("email") String email,
                                   @Param("address") String address);
+
+    @Modifying
+    @Query("UPDATE User u SET " +
+            "u.userStatus = :user_status " +
+            " WHERE u.telegramId = :telegram_id")
+
+    void updateStatusUserById(
+            @Param("telegram_id") long telegramId,
+            @Param("user_status") UserStatus userStatus);
 }

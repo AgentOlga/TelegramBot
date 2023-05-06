@@ -141,4 +141,11 @@ public class UserServiceImpl implements UserService {
     public Collection<User> getAllUser() {
         return userRepository.findAll();
     }
+
+    @Override
+    @Transactional
+    public void updateStatusUserById(Long id, UserStatus userStatus) {
+
+        userRepository.updateStatusUserById(id, userStatus);
+    }
 }

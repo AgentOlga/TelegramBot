@@ -5,7 +5,6 @@ import com.example.telegrambot.constants.StatusReport;
 import com.example.telegrambot.constants.UserStatus;
 import com.example.telegrambot.constants.UserType;
 import com.example.telegrambot.exception.NotFoundReportException;
-import com.example.telegrambot.exception.ValidationException;
 import com.example.telegrambot.listener.TelegramBotUpdatesListener;
 import com.example.telegrambot.model.*;
 import com.example.telegrambot.repository.*;
@@ -42,8 +41,10 @@ public class UserRequestServiceImpl implements UserRequestService {
     private static Report checkReport;
     private static String textReport;
     private static byte[] picture;
-    private final Pattern patternAdopter = Pattern.compile("(^\\d{9})\\s+(\\d{2})\\s+(\\d+$)");//ALT+Enter -> check
-    private final Pattern pattern = Pattern.compile("(^[А-я]+)\\s+([А-я]+)\\s+(\\d{10})\\s+([А-я0-9\\d]+$)");//ALT+Enter -> check
+    private final Pattern patternAdopter = Pattern
+            .compile("(^\\d{10})\\s+(\\d)\\s+(\\d+$)");//ALT+Enter -> check
+    private final Pattern pattern = Pattern
+            .compile("(^[А-я]+)\\s+([А-я]+)\\s+(\\d{10})\\s+([А-я0-9\\d]+$)");//ALT+Enter -> check
     private final InlineKeyboardMarkupService inlineKeyboardMarkupService;
     private final ReplyKeyboardMarkupService replyKeyboardMarkupService;
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
@@ -61,10 +62,24 @@ public class UserRequestServiceImpl implements UserRequestService {
     private final Map<Long, UserType> userCatStateByChatId = new HashMap<>();
     private final Map<Long, UserType> userDogStateByChatId = new HashMap<>();
     private final Map<Long, UserType> messageStateByChatId = new HashMap<>();
+    private final Map<Long, UserType> adopterStateByChatId = new HashMap<>();
 
     private final ShelterRepository shelterRepository;
 
-    public UserRequestServiceImpl(InlineKeyboardMarkupService inlineKeyboardMarkupService, ReplyKeyboardMarkupService replyKeyboardMarkupService, TelegramBot telegramBot, UserService userService, UserRepository userRepository, ReportService reportService, ReportRepository reportRepository, DialogRepository dialogRepository, AdopterRepository adopterRepository, AnimalService animalService, AnimalRepository animalRepository, AdopterService adopterService, AdopterRepository adopterRepository1, ShelterRepository shelterRepository) {
+    public UserRequestServiceImpl(InlineKeyboardMarkupService inlineKeyboardMarkupService,
+                                  ReplyKeyboardMarkupService replyKeyboardMarkupService,
+                                  TelegramBot telegramBot,
+                                  UserService userService,
+                                  UserRepository userRepository,
+                                  ReportService reportService,
+                                  ReportRepository reportRepository,
+                                  DialogRepository dialogRepository,
+                                  AdopterRepository adopterRepository,
+                                  AnimalService animalService,
+                                  AnimalRepository animalRepository,
+                                  AdopterService adopterService,
+                                  AdopterRepository adopterRepository1,
+                                  ShelterRepository shelterRepository) {
 
         this.inlineKeyboardMarkupService = inlineKeyboardMarkupService;
         this.replyKeyboardMarkupService = replyKeyboardMarkupService;
@@ -83,6 +98,7 @@ public class UserRequestServiceImpl implements UserRequestService {
 
     @Override
     public boolean checkReport(Update update) {
+
         if (update.message() == null)
             return false;
 
@@ -96,7 +112,23 @@ public class UserRequestServiceImpl implements UserRequestService {
     }
 
     @Override
+    public boolean checkAdopter(Update update) {
+
+        if (update.message() == null)
+            return false;
+
+        long chatId = update.message().from().id();
+
+        if (adopterStateByChatId.containsKey(chatId)) {
+            recordingNewAnimals(update);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public boolean checkUserInGuestCat(Update update) {
+
         if (update.message() == null)
             return false;
 
@@ -111,6 +143,7 @@ public class UserRequestServiceImpl implements UserRequestService {
 
     @Override
     public boolean checkUserInGuestDog(Update update) {
+
         if (update.message() == null)
             return false;
 
@@ -123,27 +156,20 @@ public class UserRequestServiceImpl implements UserRequestService {
         return false;
     }
 
-    @Override
-    public boolean checkFreeMessage(Update update) {
-        if (update.message() == null)
-            return false;
-
-        long chatId = update.message().from().id();
-
-        if (messageStateByChatId.containsKey(chatId)) {
-            getFreeMessage(update);
-            return true;
-        }
-        return false;
-    }
-
     private void handleAdopterReport(Update update) {
+
         Message message = update.message();
         Long chatId = message.from().id();
         long userId = update.message().from().id();
         String text = message.text();
 
         User user = userRepository.findByTelegramId(userId);
+
+        List<Dialog> dialogList = dialogRepository.findAll().stream().toList();
+        for (Dialog dialog : dialogList) {
+            dialogRepository.delete(dialog);
+        }
+
         Report report = reportRepository.findReportByUserId(user);
         LocalDate dateReport = LocalDate.now();
         StatusReport statusReport = StatusReport.DEFAULT;
@@ -182,7 +208,7 @@ public class UserRequestServiceImpl implements UserRequestService {
 
         if (textReport != null && picture != null) {
             SendMessage message1 = new SendMessage(chatId, "Спасибо за полный отчёт," +
-                    " результат проверки узнаете в течении дня!");
+                    " результат проверки узнаете в течение дня!");
             message1.replyMarkup(inlineKeyboardMarkupService.createButtonsCatShelterReport());
             telegramBot.execute(message1);
 
@@ -200,7 +226,8 @@ public class UserRequestServiceImpl implements UserRequestService {
         Message message = update.message();
         Long chatId = message.from().id();
         String text = message.text();
-        String userName = update.message().from().firstName();
+        String firstName = update.message().from().firstName();
+        String userName = update.message().from().username();
         long telegramId = update.message().from().id();
 
         if ("/start".equals(text)) {
@@ -208,14 +235,14 @@ public class UserRequestServiceImpl implements UserRequestService {
             User user = userService.findUserByTelegramId(telegramId);
 
             if (user == null) {
-                greetingNewUser(chatId, userName);
+                greetingNewUser(chatId, firstName);
                 userService.addUser(telegramId, userName, UserType.DEFAULT, UserStatus.APPROVE);
 
             } else if (user.getUserType() == UserType.DEFAULT && user.getUserStatus() == UserStatus.APPROVE) {
-                greetingNotNewUser(chatId, userName);
+                greetingNotNewUser(chatId, firstName);
 
             } else if (user.getUserType() == UserType.GUEST && user.getUserStatus() == UserStatus.APPROVE) {
-                greetingGuest(chatId, userName);
+                greetingGuest(chatId, firstName);
 
             } else if (user.getUserType() == UserType.ADOPTER && user.getUserStatus() == UserStatus.APPROVE) {
 
@@ -233,7 +260,7 @@ public class UserRequestServiceImpl implements UserRequestService {
                             sendMessage(chatId, dialog.getTextMessage());
                         }
                     }
-                    greetingAdopterCatShelter(chatId, userName);
+                    greetingAdopterCatShelter(chatId, firstName);
 
                 } else if (user.getShelterType() == ShelterType.DOG_SHELTER) {
                     List<Dialog> dialogList = dialogRepository.findAll().stream().toList();
@@ -243,19 +270,27 @@ public class UserRequestServiceImpl implements UserRequestService {
                             sendMessage(chatId, dialog.getTextMessage());
                         }
                     }
-                    greetingAdopterDogShelter(chatId, userName);
+                    greetingAdopterDogShelter(chatId, firstName);
                 }
 
             } else if (user.getUserType() == UserType.VOLUNTEER && user.getUserStatus() == UserStatus.APPROVE) {
-                greetingVolunteer(chatId, userName);
+                greetingVolunteer(chatId, firstName);
 
             } else {
-                blockedUser(chatId, userName);
+                blockedUser(chatId, firstName);
+                List<Dialog> dialogList = dialogRepository.findAll().stream().toList();
+
+                for (Dialog dialog : dialogList) {
+                    if (dialog.getGuestId().equals(user)) {
+                        sendMessage(chatId, dialog.getTextMessage());
+                    }
+                }
             }
         }
     }
 
     private void greetingVolunteer(long chatId, String name) {
+
         SendMessage sendMessage =
                 new SendMessage(chatId, String.format(GREETING_VOLUNTEER, name));
 
@@ -267,6 +302,7 @@ public class UserRequestServiceImpl implements UserRequestService {
     }
 
     private void greetingGuest(long chatId, String name) {
+
         SendMessage sendMessage =
                 new SendMessage(chatId, String.format(GREETING_GUEST, name));
 
@@ -302,6 +338,7 @@ public class UserRequestServiceImpl implements UserRequestService {
     }
 
     private void blockedUser(long chatId, String name) {
+
         SendMessage sendMessage =
                 new SendMessage(chatId, String.format(NOT_GREETING_USER, name));
 
@@ -342,7 +379,6 @@ public class UserRequestServiceImpl implements UserRequestService {
         if (callbackQuery != null) {
             long chatId = callbackQuery.message().chat().id();
             String data = callbackQuery.data();
-            long userId = callbackQuery.message().from().id();
             switch (data) {
                 case CLICK_CAT_SHELTER:
 
@@ -396,7 +432,13 @@ public class UserRequestServiceImpl implements UserRequestService {
                     break;
 
                 case CLICK_RECORDING_NEW_ANIMAL:
-                    recordingNewAnimals(update);
+
+                    SendMessage sendMessage6 = new SendMessage(chatId, """
+                            Чтобы записать усыновителя, нужно заполнить форму:
+                            Напишите telegramId усыновителя, animalId, shelterId
+                            в формате: 123456789 1 1""");
+                    sendMessage(sendMessage6);
+
                     break;
                 case CLICK_ARRANGEMENT_CAT_HOME:
 
@@ -438,6 +480,7 @@ public class UserRequestServiceImpl implements UserRequestService {
                 case CLICK_FREE_MESSAGE:
 
                     messageStateByChatId.put(chatId, UserType.VOLUNTEER);
+                    getFreeMessage(update);
 
                     break;
                 case CLICK_REPORT_CAT:
@@ -484,6 +527,12 @@ public class UserRequestServiceImpl implements UserRequestService {
 
                     sendWarningMessage(update);
                     sendMessage(chatId, "Предупреждение отправлено!");
+
+                    break;
+                case CLICK_DELETE_ADOPTER:
+
+                    sendWarningDeleteAdopter(update);
+                    sendMessage(chatId, "Пользователь заблокирован!");
 
                     break;
                 case CLICK_EXTEND_14_DAY:
@@ -533,10 +582,28 @@ public class UserRequestServiceImpl implements UserRequestService {
         dialogRepository.save(dialog);
     }
 
+    private void sendWarningDeleteAdopter(Update update) {
+
+        String textMessage = "Вы не прошли испытательный срок, " +
+                "в ближайшее время с Вами свяжется волонтер для " +
+                "дальнейшего плана действия!" +
+                "Отныне, Вы персона нон града и доступ в наш приют заблокирован!";
+
+        LocalDate date = LocalDate.now();
+
+        User guest = checkReport.getUserId();
+        UserStatus userStatus = UserStatus.BLOCKED;
+
+        Dialog dialog = new Dialog(guest, null, textMessage, date);
+
+        dialogRepository.save(dialog);
+
+        userService.updateStatusUserById(guest.getTelegramId(), userStatus);
+    }
+
     private void sendWarningMessage(Update update) {
 
         Message message = update.callbackQuery().message();
-        long chatId = message.chat().id();
         String textMessage = "Дорогой усыновитель, мы заметили, " +
                 "что ты заполняешь отчет не так подробно, как необходимо." +
                 " Пожалуйста, подойди ответственнее к этому занятию. " +
@@ -555,6 +622,7 @@ public class UserRequestServiceImpl implements UserRequestService {
     }
 
     private void checkReportStatusOk() {
+
         User user = checkReport.getUserId();
 
         StatusReport statusReport = StatusReport.ACCEPTED;
@@ -565,6 +633,7 @@ public class UserRequestServiceImpl implements UserRequestService {
     }
 
     private void checkReportStatusNotOk() {
+
         User user = checkReport.getUserId();
 
         StatusReport statusReport = StatusReport.NOT_ACCEPTED;
@@ -575,36 +644,21 @@ public class UserRequestServiceImpl implements UserRequestService {
 
     public void getFreeMessage(Update update) {
 
-        Message message = update.message();
+        Message message = update.callbackQuery().message();
         long chatId = message.chat().id();
-        String text = message.text();
-        String textMessage;
-        long userId = message.from().id();
-
-        LocalDate date = LocalDate.now();
 
         User guest = checkReport.getUserId();
-        User volunteer = userService.findUserByTelegramId(userId);
 
-        Dialog dialog = new Dialog(guest, volunteer, "Напишите волонтеру " + volunteer.getTelegramId() + " " +
-                "" + volunteer.getFirstName() + " в личном сообщении!", date);
-
-        dialogRepository.save(dialog);
-
-        sendMessage(chatId, "Напишите пользователю " + guest.getTelegramId() + " " +
+        sendMessage(chatId, "Напишите пользователю " + '@' + guest.getTelegramNick() + " " +
                 "" + guest.getFirstName() + " в личном сообщении!");
-
     }
 
     private void getCheckReport(Update update) {
 
         Message message = update.callbackQuery().message();
         long chatId = message.chat().id();
-        String text = message.text();
-        long userId = message.from().id();
 
         List<Report> reportList = reportService.getAllReport().stream().toList();
-
 
         for (Report report : reportList) {
             if (report.getStatusReport() == StatusReport.DEFAULT) {
@@ -617,7 +671,7 @@ public class UserRequestServiceImpl implements UserRequestService {
             throw new NotFoundReportException("Отчетов нет!");
         }
 
-        String name = checkReport.getUserId().getTelegramNick();
+        String name = checkReport.getUserId().getFirstName();
         SendMessage sendMessage =
                 new SendMessage(chatId, "Отчет от " + name +
                         ", был отправлен " + checkReport.getDateReport() + " :\n" +
@@ -678,6 +732,7 @@ public class UserRequestServiceImpl implements UserRequestService {
     }
 
     private void sendMessage(SendMessage sendMessage) {
+
         SendResponse sendResponse = telegramBot.execute(sendMessage);
         if (sendResponse != null && !sendResponse.isOk()) {
             logger.error("Error during sending message: {}", sendResponse.description());
@@ -731,7 +786,7 @@ public class UserRequestServiceImpl implements UserRequestService {
         long chatId = message.chat().id();
         String text = message.text();
         long userId = message.from().id();
-        String userName = message.from().firstName();
+        String userName = message.from().username();
 
         String firstName;
         String lastName;
@@ -762,14 +817,12 @@ public class UserRequestServiceImpl implements UserRequestService {
                         carNumber);
 
                 sendMessage(chatId, "Анкета успешно заполнена!");
-                greetingGuest(chatId, userName);
+                greetingGuest(chatId, firstName);
 
             } else {
                 sendMessage(chatId, "Некорректный формат!");
             }
         }
-
-
     }
 
     public void updateUserInGuestDogShelter(Update update) {
@@ -778,7 +831,7 @@ public class UserRequestServiceImpl implements UserRequestService {
         long chatId = message.chat().id();
         String text = message.text();
         long userId = message.from().id();
-        String userName = message.from().firstName();
+        String userName = message.from().username();
 
         String firstName;
         String lastName;
@@ -809,7 +862,7 @@ public class UserRequestServiceImpl implements UserRequestService {
                         carNumber);
 
                 sendMessage(chatId, "Анкета успешно заполнена!");
-                greetingGuest(chatId, userName);
+                greetingGuest(chatId, firstName);
 
             } else {
                 sendMessage(chatId, "Некорректный формат!");
@@ -828,18 +881,13 @@ public class UserRequestServiceImpl implements UserRequestService {
 
     private void recordingNewAnimals(Update update) {
 
-
         Message message = update.message();
         String text = message.text();
+        String userName = message.from().firstName();
         long chatId = message.chat().id();
         long telegramId;
         long animalID;
         long shelterID;
-
-        sendMessage(chatId, """
-                Чтобы записать усыновителя,
-                нужно заполнить форму:
-                Напишите  chatId, userId, animal, shelter""");
 
         if (text != null) {
             Matcher matcher = patternAdopter.matcher(text);
@@ -859,94 +907,13 @@ public class UserRequestServiceImpl implements UserRequestService {
                 if (adopterOne == null) {
                     adopterRepository.save(adopter);
                     sendMessage(chatId, "усыновитель добавлен");
+                    greetingVolunteer(chatId, userName);
                 } else {
                     sendMessage(chatId, "усыновитель уже есть в БД");
-                    throw new ValidationException("");
                 }
-                getMainMenuClick(chatId);
-
             } else {
                 sendMessage(chatId, "некорректно введены данные");
             }
         }
     }
-
-
-    /*public void updateUserInGuest(Update update, long chatId) {
-
-        Message message = update.message();
-
-        String text = message.text();
-
-        String firstName = null;
-        String lastName = null;
-        String phoneNumber = null;
-        String carNumber = null;
-
-        sendMessage(chatId, "Чтобы записаться на посещение,\n" +
-                "нужно заполнить анкету:\n" +
-                "Напишите Ваше имя");
-
-        if (text != null) {
-            Matcher matcher = patternName.matcher(text);
-            if (matcher.find()) {
-                firstName = text;
-
-                sendMessage(chatId,
-                        "Напишите Вашу фамилию");
-
-                if (text != null) {
-                    Matcher matcher1 = patternName.matcher(text);
-                    if (matcher1.find()) {
-                        lastName = text;
-
-                        sendMessage(chatId,
-                                "Напишите Ваш номер телефона без кода страны в формате: XXXХХХХХХХ");
-
-                        if (text != null) {
-                            Matcher matcher2 = patternPhone.matcher(text);
-                            if (matcher2.find()) {
-                                phoneNumber = '7' + text;
-
-                                sendMessage(chatId,
-                                        "Напишите номер Вашей машины.");
-
-                                if (text != null) {
-                                    Matcher matcher3 = patternCar.matcher(text);
-                                    if (matcher3.find()) {
-                                        carNumber = text;
-                                        long userId = update.message().from().id();
-
-                                        userRepository.updateUserInGuestById(userId,
-                                                firstName,
-                                                lastName,
-                                                phoneNumber,
-                                                carNumber,
-                                                UserType.GUEST,
-                                                UserStatus.APPROVE);
-
-                                        sendMessage(chatId, "Анкета успешно заполнена!");
-                                        getMainMenuClick(chatId);
-                                    } else {
-                                        sendMessage(chatId, "Номер введен некорректно!");
-                                    }
-                                    //sendMessage(sendMessage3);
-                                }
-
-                            } else {
-                                sendMessage(chatId, "Номер телефона введен некорректно!");
-                            }
-                            //sendMessage(sendMessage2);
-                        } else {
-                            sendMessage(chatId, "Некорректный формат фамилии!");
-                        }
-                    }
-                    //sendMessage(sendMessage1);
-                } else {
-                    sendMessage(chatId, "Некорректный формат имени!");
-                }
-            }
-            //sendMessage(sendMessage);
-        }
-    }*/
 }

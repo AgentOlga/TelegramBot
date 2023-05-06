@@ -242,6 +242,8 @@ public class InlineKeyboardMarkupServiceImpl implements InlineKeyboardMarkupServ
                 .callbackData(CLICK_WARNING_REPORT));
         inlineKeyboardMarkup.addRow(new InlineKeyboardButton(BUTTON_EXTEND)
                 .callbackData(CLICK_EXTEND));
+        inlineKeyboardMarkup.addRow(new InlineKeyboardButton(BUTTON_DELETE_ADOPTER)
+                .callbackData(CLICK_DELETE_ADOPTER));
 
         return inlineKeyboardMarkup;
     }
