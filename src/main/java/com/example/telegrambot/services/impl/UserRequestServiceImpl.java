@@ -23,10 +23,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -41,7 +46,7 @@ public class UserRequestServiceImpl implements UserRequestService {
     private static Report checkReport;
     private static String textReport;
     private static byte[] picture;
-    private final Pattern patternAdopter = Pattern
+      private final Pattern patternAdopter = Pattern
             .compile("(^\\d{10})\\s+(\\d)\\s+(\\d+$)");//ALT+Enter -> check
     private final Pattern pattern = Pattern
             .compile("(^[А-я]+)\\s+([А-я]+)\\s+(\\d{10})\\s+([А-я0-9\\d]+$)");//ALT+Enter -> check
@@ -65,7 +70,12 @@ public class UserRequestServiceImpl implements UserRequestService {
 
     private final ShelterRepository shelterRepository;
 
-    public UserRequestServiceImpl(InlineKeyboardMarkupService inlineKeyboardMarkupService,
+    private static final int HOUR_OF_DAY = 18;
+    private static final int MINUTE = 0;
+    private static final int SECOND = 0;
+    private static final long PERIOD_SECONDS = 24 * 60 * 60;
+
+        public UserRequestServiceImpl(InlineKeyboardMarkupService inlineKeyboardMarkupService,
                                   TelegramBot telegramBot,
                                   UserService userService,
                                   UserRepository userRepository,
@@ -376,6 +386,7 @@ public class UserRequestServiceImpl implements UserRequestService {
         if (callbackQuery != null) {
             long chatId = callbackQuery.message().chat().id();
             String data = callbackQuery.data();
+            sendingTimer(chatId);
             switch (data) {
                 case CLICK_CAT_SHELTER:
 
@@ -912,5 +923,26 @@ public class UserRequestServiceImpl implements UserRequestService {
                 sendMessage(chatId, "некорректно введены данные");
             }
         }
+    }
+
+    public void sendingTimer(long chatId) {
+        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime nextRun = LocalDateTime.of(now.getYear(), now.getMonth(), now.getDayOfMonth(), HOUR_OF_DAY, MINUTE, SECOND);
+        if (now.compareTo(nextRun) > 0) {
+            nextRun = nextRun.plusDays(1);
+        }
+        long initialDelay = Duration.between(now, nextRun).getSeconds();
+        long period = PERIOD_SECONDS;
+        scheduler.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                Report reportLast = reportRepository.getReferenceById(chatId);
+                if (reportLast.getDateReport().isBefore(LocalDate.now().minusDays(2))) {
+                    sendMessage(chatId, "Вы находитесь на испытательном сроке с животным, " +
+                            "пожалуйста, предоставьте отчёт за последние 2 дня.");
+                }
+            }
+        }, initialDelay, period, TimeUnit.SECONDS);
     }
 }
