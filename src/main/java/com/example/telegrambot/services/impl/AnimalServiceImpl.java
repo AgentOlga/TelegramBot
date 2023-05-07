@@ -39,7 +39,8 @@ public class AnimalServiceImpl implements AnimalService {
         if (!validationService.validate(animal)) {
             throw new ValidationException(animal.toString());
         }
-        return animalRepository.save(animal);
+        animalRepository.save(animal);
+        return animal;
     }
 
     @Override
