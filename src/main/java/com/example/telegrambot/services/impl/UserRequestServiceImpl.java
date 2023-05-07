@@ -14,6 +14,7 @@ import com.pengrad.telegrambot.model.CallbackQuery;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.PhotoSize;
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.request.ForwardMessage;
 import com.pengrad.telegrambot.request.GetFile;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.GetFileResponse;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,6 +64,8 @@ public class UserRequestServiceImpl implements UserRequestService {
     private final Map<Long, UserType> userDogStateByChatId = new HashMap<>();
     private final Map<Long, UserType> messageStateByChatId = new HashMap<>();
     private final Map<Long, UserType> adopterStateByChatId = new HashMap<>();
+
+    private final Map<Long, String> stateByChatId = new HashMap<>();
 
     private final ShelterRepository shelterRepository;
 
@@ -103,6 +107,28 @@ public class UserRequestServiceImpl implements UserRequestService {
 
         if (reportStateByChatId.containsKey(chatId)) {
             handleAdopterReport(update);
+            reportStateByChatId.remove(chatId);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean checkVolunteer(Update update) {
+
+        if (update.message() == null)
+            return false;
+
+        long chatId = update.message().from().id();
+
+
+        if (!stateByChatId.containsKey(chatId))
+            return false;
+
+        String state =  stateByChatId.get(chatId);
+        if (state == CLICK_CALL_A_VOLUNTEER) {
+            handleCallVolunteer(update);
+            stateByChatId.remove(chatId);
             return true;
         }
         return false;
@@ -151,6 +177,29 @@ public class UserRequestServiceImpl implements UserRequestService {
             return true;
         }
         return false;
+    }
+
+    private void handleCallVolunteer(Update update) {
+        Message message = update.message();
+        Long chatId = message.from().id();
+        long userId = update.message().from().id();
+        String text = message.text();
+
+
+        List<User> users = userService.getAllUsers();
+        List<User> volunteers = new ArrayList<User>();
+        for (User user : users) {
+            if (user.getUserType() == UserType.VOLUNTEER)
+                volunteers.add(user);
+        }
+
+        for (User volunteer : volunteers) {
+            telegramBot.execute(new SendMessage(volunteer.getTelegramId(), "Усыновитель " + userId + " послал сообщение: " + text));
+        }
+
+        SendMessage message1 = new SendMessage(chatId, "Первый освободившийся волонтёр ответит вам в ближайшее время");
+        //message1.replyMarkup(inlineKeyboardMarkupService.createButtonsCatShelterReport());
+        telegramBot.execute(message1);
     }
 
     private void handleAdopterReport(Update update) {
@@ -422,11 +471,14 @@ public class UserRequestServiceImpl implements UserRequestService {
                     getDogShelterReportClick(chatId);
 
                     break;
-                case CLICK_CALL_A_VOLUNTEER:
-
+                case CLICK_CALL_A_VOLUNTEER: {
                     //todo взаимодействие с волонтером
-
+                    stateByChatId.put(chatId, CLICK_CALL_A_VOLUNTEER);
+                    SendMessage sendMessage = new SendMessage(chatId, "пожалуйста, введите сообщение для волонтера");
+                    sendMessage(sendMessage);
                     break;
+                }
+
 
                 case CLICK_RECORDING_NEW_ANIMAL:
 

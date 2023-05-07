@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Бизнес-логика по работе с пользователями
@@ -34,6 +35,11 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public User findUserByTelegramId(long telegramId) {
         return userRepository.findByTelegramId(telegramId);
+    }
+
+    @Override
+    public List<User> getAllUsers() {
+        return userRepository.getAllUsers();
     }
 
     @Override

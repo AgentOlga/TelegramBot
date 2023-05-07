@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import java.util.*;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -22,6 +23,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
      */
     @Query("SELECT u FROM User u WHERE u.telegramId = :telegram_id")
     User findByTelegramId(@Param("telegram_id") Long telegramId);
+
+    @Query("SELECT u FROM User u")
+    List<User> getAllUsers();
 
     /**
      * Изменяем пользователя до гостя

@@ -6,6 +6,7 @@ import com.example.telegrambot.constants.UserType;
 import com.example.telegrambot.model.User;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Сервис по работе с пользователями телеграм бота.
@@ -13,6 +14,8 @@ import java.util.Collection;
 public interface UserService {
 
     User findUserByTelegramId(long userId);
+
+    List<User> getAllUsers();
 
     /**
      * Создание пользователя бота

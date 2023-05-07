@@ -51,6 +51,10 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                     return;
                 }
 
+                if (userRequestService.checkVolunteer(update)) {
+                    return;
+                }
+
                 if (userRequestService.checkAdopter(update)) {
                     return;
                 }

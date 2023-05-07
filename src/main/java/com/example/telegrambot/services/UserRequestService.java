@@ -9,6 +9,7 @@ import com.pengrad.telegrambot.model.Update;
 public interface UserRequestService {
 
     boolean checkReport(Update update);
+    boolean checkVolunteer(Update update);
 
     boolean checkAdopter(Update update);
 
