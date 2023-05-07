@@ -41,6 +41,8 @@ import static com.example.telegrambot.constants.ConstantValue.*;
 public class UserRequestServiceImpl implements UserRequestService {
 
     private static Report checkReport;
+
+
     private static String textReport;
     private static byte[] picture;
     private final Pattern patternAdopter = Pattern
@@ -63,7 +65,16 @@ public class UserRequestServiceImpl implements UserRequestService {
     private final Map<Long, UserType> userCatStateByChatId = new HashMap<>();
     private final Map<Long, UserType> userDogStateByChatId = new HashMap<>();
     private final Map<Long, UserType> messageStateByChatId = new HashMap<>();
+
     private final Map<Long, UserType> adopterStateByChatId = new HashMap<>();
+
+
+
+
+
+
+
+
 
     private final Map<Long, String> stateByChatId = new HashMap<>();
 
