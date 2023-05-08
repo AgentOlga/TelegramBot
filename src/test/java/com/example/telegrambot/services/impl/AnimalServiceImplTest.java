@@ -87,10 +87,7 @@ class AnimalServiceImplTest {
     public void testUpdateAnimalByIdWithNonExistentAnimal() {
 
         Long id = 1L;
-        String nickName = "Nick";
-        PetType petType = PetType.CAT;
-        Color color = Color.WHITE;
-        Sex sex = Sex.WOMEN;
+
 
         when(animalRepository.getReferenceById(id)).thenReturn(null);
 
