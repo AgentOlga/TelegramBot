@@ -116,4 +116,52 @@ class AdopterTest {
 
         assertEquals(shelter, adopter.getShelter());
     }
+
+    @Test
+    public void testGettersAndSetters() {
+
+        Adopter adopter = new Adopter(user, animal, shelter);
+
+        assertEquals(user, adopter.getUser());
+        adopter.setUser(new User(CORRECT_USER_ID, CORRECT_USER_NAME, CORRECT_USER_TYPE,
+                CORRECT_USER_STATUS));
+        assertEquals(CORRECT_USER_NAME, adopter.getUser().getTelegramNick());
+
+        assertEquals(animal, adopter.getAnimal());
+        adopter.setAnimal(new Animal(CORRECT_NICK_NAME,
+                CORRECT_PET_TYPE,
+                CORRECT_COLOR,
+                CORRECT_SEX));
+        assertEquals(CORRECT_PET_TYPE, adopter.getAnimal().getPetType());
+
+        assertEquals(shelter, adopter.getShelter());
+        adopter.setShelter(new Shelter(CORRECT_ADDRESS,
+                CORRECT_TIME_WORK,
+                CORRECT_DRIVING,
+                CORRECT_PHONE_NUMBER,
+                CORRECT_PHONE_NUMBER,
+                CORRECT_SHELTER_TYPE));
+        assertEquals(CORRECT_SHELTER_TYPE, adopter.getShelter().getShelterType());
+    }
+
+    @Test
+    public void testId() {
+        Adopter adopter1 = adopter;
+        Adopter adopter2 = new Adopter(new User(123456, "CORRECT_USER_NAME", CORRECT_USER_TYPE,
+                CORRECT_USER_STATUS), new Animal("CORRECT_NICK_NAME",
+                CORRECT_PET_TYPE,
+                CORRECT_COLOR,
+                CORRECT_SEX), new Shelter(CORRECT_ADDRESS,
+                CORRECT_TIME_WORK,
+                CORRECT_DRIVING,
+                CORRECT_PHONE_NUMBER,
+                CORRECT_PHONE_NUMBER,
+                CORRECT_SHELTER_TYPE));
+
+        adopter1.setId(1);
+        adopter2.setId(2);
+
+        assertEquals(1, adopter1.getId());
+        assertEquals(2, adopter2.getId());
+    }
 }
