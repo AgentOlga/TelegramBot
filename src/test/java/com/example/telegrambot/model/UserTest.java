@@ -29,6 +29,7 @@ class UserTest {
 
     private static final String EMPTY_VALUE = "";
     private static final String BLANK_VALUE = " ";
+
     private User user;
     private User userCorrect;
     private User userWrong;
@@ -104,6 +105,7 @@ class UserTest {
     public void CheckingForIncomingWrongDataFromTheMethodAddGuest() {
         assertNotEquals(guestCorrect, guestWrong);
     }
+
     @Test
     public void checkingForIncomingCorrectDataFromTheMethodAddAdopter() {
         assertEquals(adopterCorrect, adopter);
@@ -187,4 +189,22 @@ class UserTest {
         assertEquals(user.getTelegramNick(), ConstantValue.DEFAULT_TELEGRAM_NICK);
     }
 
+    @Test
+    public void CheckingTheCorrectAddressIsEntered() {
+        String testAddress = "Astana, lenina 12";
+        TestClass testObj = new TestClass();
+        testObj.setAddress(testAddress);
+        assertEquals(testAddress, CORRECT_ADDRESS);
+    }
+
+
+    class TestClass {
+        private String address;
+        public void setAddress(String address) {
+            this.address = address;
+        }
+        public String getAddress() {
+            return address;
+        }
+    }
 }

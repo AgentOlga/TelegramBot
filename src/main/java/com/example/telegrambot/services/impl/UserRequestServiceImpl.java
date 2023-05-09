@@ -50,7 +50,7 @@ public class UserRequestServiceImpl implements UserRequestService {
 
     private static String textReport;
     private static byte[] picture;
-      private final Pattern patternAdopter = Pattern
+    private final Pattern patternAdopter = Pattern
             .compile("(^\\d{10})\\s+(\\d)\\s+(\\d+$)");//ALT+Enter -> check
     private final Pattern pattern = Pattern
             .compile("(^[А-я]+)\\s+([А-я]+)\\s+(\\d{10})\\s+([А-я0-9\\d]+$)");//ALT+Enter -> check
@@ -66,21 +66,12 @@ public class UserRequestServiceImpl implements UserRequestService {
     private final AnimalRepository animalRepository;
     private final AdopterService adopterService;
     private final AdopterRepository adopterRepository;
-    private final Map<Long, UserType> reportStateByChatId = new HashMap<>();
-    private final Map<Long, UserType> userCatStateByChatId = new HashMap<>();
-    private final Map<Long, UserType> userDogStateByChatId = new HashMap<>();
+    final Map<Long, UserType> reportStateByChatId = new HashMap<>();
+    final Map<Long, UserType> userCatStateByChatId = new HashMap<>();
+    final Map<Long, UserType> userDogStateByChatId = new HashMap<>();
     private final Map<Long, UserType> messageStateByChatId = new HashMap<>();
 
-    private final Map<Long, UserType> adopterStateByChatId = new HashMap<>();
-
-
-
-
-
-
-
-
-
+    final Map<Long, UserType> adopterStateByChatId = new HashMap<>();
     private final Map<Long, String> stateByChatId = new HashMap<>();
 
     private final ShelterRepository shelterRepository;
@@ -90,7 +81,7 @@ public class UserRequestServiceImpl implements UserRequestService {
     private static final int SECOND = 0;
     private static final long PERIOD_SECONDS = 24 * 60 * 60;
 
-        public UserRequestServiceImpl(InlineKeyboardMarkupService inlineKeyboardMarkupService,
+    public UserRequestServiceImpl(InlineKeyboardMarkupService inlineKeyboardMarkupService,
                                   TelegramBot telegramBot,
                                   UserService userService,
                                   UserRepository userRepository,
@@ -146,7 +137,7 @@ public class UserRequestServiceImpl implements UserRequestService {
         if (!stateByChatId.containsKey(chatId))
             return false;
 
-        String state =  stateByChatId.get(chatId);
+        String state = stateByChatId.get(chatId);
         if (state == CLICK_CALL_A_VOLUNTEER) {
             handleCallVolunteer(update);
             stateByChatId.remove(chatId);
@@ -205,6 +196,7 @@ public class UserRequestServiceImpl implements UserRequestService {
         Long chatId = message.from().id();
         long userId = update.message().from().id();
         String text = message.text();
+        String name = message.from().username();
 
 
         List<User> users = userService.getAllUsers();
@@ -215,7 +207,8 @@ public class UserRequestServiceImpl implements UserRequestService {
         }
 
         for (User volunteer : volunteers) {
-            telegramBot.execute(new SendMessage(volunteer.getTelegramId(), "Усыновитель " + userId + " послал сообщение: " + text));
+            telegramBot.execute(new SendMessage(volunteer.getTelegramId(), "Усыновитель " +
+                    "" + '@' + name + " послал сообщение: " + text));
         }
 
         SendMessage message1 = new SendMessage(chatId, "Первый освободившийся волонтёр ответит вам в ближайшее время");
@@ -494,13 +487,12 @@ public class UserRequestServiceImpl implements UserRequestService {
 
                     break;
                 case CLICK_CALL_A_VOLUNTEER: {
-                    //todo взаимодействие с волонтером
+
                     stateByChatId.put(chatId, CLICK_CALL_A_VOLUNTEER);
                     SendMessage sendMessage = new SendMessage(chatId, "пожалуйста, введите сообщение для волонтера");
                     sendMessage(sendMessage);
                     break;
                 }
-
 
                 case CLICK_RECORDING_NEW_ANIMAL:
 
@@ -616,6 +608,117 @@ public class UserRequestServiceImpl implements UserRequestService {
 
                     sendExtend30Day();
                     sendMessage(chatId, "Испытательный срок продлен на 30 дней!");
+
+                    break;
+                case CLICK_RULES_REPORT_CAT:
+                case CLICK_RULES_REPORT_DOG:
+
+                    sendMessage(chatId, "После того как новый усыновитель забрал животное из приюта, " +
+                            "он обязан в течение месяца присылать информацию о том, как животное чувствует " +
+                            "себя на новом месте. В ежедневный отчет входит следующая информация:\n" +
+                            "    - Фото животного.\n" +
+                            "    - Рацион животного.\n" +
+                            "    - Общее самочувствие и привыкание к новому месту.\n" +
+                            "    - Изменение в поведении: отказ от старых привычек, приобретение новых.\n" +
+                            "Отчет нужно присылать каждый день, ограничений в сутках по времени сдачи отчета нет. " +
+                            "Каждый день волонтеры осматривают все присланные отчеты после 21:00. ");
+
+                    break;
+                case CLICK_CAT_SHELTER_OVERVIEW:
+
+                    sendMessage(chatId, "Адрес приюта для кошек в Астане: улица Кошачья, 123.\n" +
+                            "Кошачий приют в Астане работает ежедневно с 10:00 до 19:00.\n" +
+                            "Место нахождение приюта на карте: " +
+                            "https://www.google.com/maps/search/?api=1&query=" +
+                            "%D0%BA%D0%BE%D1%88%D0%B0%D1%87%D0%B8%D0%B9+%D0%BF%D1%80%D0%B8" +
+                            "%D1%8E%D1%82+%D0%B0%D1%81%D1%82%D0%B0%D0%BD%D0%B0\n" +
+                            "Кошачий приют в Астане: +7 (717) 111-CATS (2287)\n" +
+                            "Телефон охраны: +7 (717) 111-CATS (2288)");
+
+                    break;
+                case CLICK_DOG_SHELTER_OVERVIEW:
+
+                    sendMessage(chatId, "Адрес приюта для собак в Астане: улица Собачья, 321.\n" +
+                            "Собачий приют в Астане работает ежедневно с 10:00 до 19:00.\n" +
+                            "Место нахождение приюта на карте: " +
+                            "https://www.google.com/maps/search/?api=1&query=" +
+                            "%D0%BA%D0%BE%D1%88%D0%B0%D1%87%D0%B8%D0%B9+%D0%BF%D1%80%D0%B8" +
+                            "%D1%8E%D1%82+%D0%B0%D1%81%D1%82%D0%B0%D0%BD%D0%B0\n" +
+                            "Собачий приют в Астане: +7 (717) 111-CATS (2287)\n" +
+                            "Телефон охраны: +7 (717) 111-CATS (2288)");
+
+                    break;
+                case CLICK_SAFETY_PRECAUTIONS_CAT:
+
+                    sendMessage(chatId, "Техника безопасности для кошачьего приюта в Астане может включать " +
+                            "в себя следующие меры:\n" +
+                            "\n" +
+                            "\n" +
+                            "Установка камер видеонаблюдения во всех помещениях кошачьего приюта, чтобы следить за" +
+                            " поведением животных и присутствием посетителей.\n" +
+                            "\n" +
+                            "Введение системы идентификации сотрудников приюта, которая позволит контролировать " +
+                            "доступ в здание.\n" +
+                            "\n" +
+                            "Регулярная обучение персонала правилам безопасности на рабочем месте, пожарной" +
+                            " безопасности и первой помощи.\n" +
+                            "\n" +
+                            "Установка автоматической пожарной сигнализации и противопожарных систем, таких как " +
+                            "огнетушители и система полива.\n" +
+                            "\n" +
+                            "Разделение помещений на зоны для кошек с различными заболеваниями и без них, чтобы" +
+                            " предотвратить распространение инфекций и болезней.\n" +
+                            "\n" +
+                            "Контроль качества пищи и воды, которые используются для кормления кошек.\n" +
+                            "\n" +
+                            "Регулярная дезинфекция и уборка в помещениях, используемых для кошек.\n" +
+                            "\n" +
+                            "Установка противокражных систем для снаряжения и оборудования, используемого в приюте.\n" +
+                            "\n" +
+                            "Установка ограждений и замков на входных дверях, чтобы предотвратить выход кошек без " +
+                            "разрешения.\n" +
+                            "\n" +
+                            "Обязательное ношение сотрудниками специальной одежды и обуви, чтобы предотвратить " +
+                            "распространение инфекций.");
+
+                    break;
+                case CLICK_SAFETY_PRECAUTIONS_DOG:
+
+                    sendMessage(chatId, "Техника безопасности для собачьего приюта в Астане может включать" +
+                            " в себя следующие элементы:\n" +
+                            "\n" +
+                            "\n" +
+                            "Ограждение: Это может быть высокое заборное сооружение или специальный электрический " +
+                            "забор, который обеспечивает безопасность собакам и предотвращает их выход за территорию приюта.\n" +
+                            "\n" +
+                            "Внутреннее пространство: Внутри приюта стенки для собак должны быть прочными и надежными, " +
+                            "чтобы предотвратить возможность их побега. Также, внутреннее пространство должно регулярно" +
+                            " очищаться и дезинфицироваться, чтобы предотвратить распространение инфекций и заболеваний.\n" +
+                            "\n" +
+                            "Обучение персонала: Работники приюта должны быть обучены правильному обращению и уходу за" +
+                            " собаками, а также знать, как реагировать на возможные опасные ситуации.\n" +
+                            "\n" +
+                            "Контроль посетителей: В приюте может быть установлена система контроля посетителей, " +
+                            "которая обеспечивает безопасность для людей и собак. Также, может быть введена политика" +
+                            " посещений, которая ограничивает посещения конкретными группами или индивидуальными " +
+                            "посетителями.\n" +
+                            "\n" +
+                            "Системы мониторинга: Может быть установлены камеры наблюдения и другие системы " +
+                            "мониторинга, которые помогают улучшить безопасность в приюте.");
+
+                    break;
+                case CLICK_CAR_PASS_CAT:
+
+                    sendMessage(chatId, "Чтобы оформить пропуск для автомобиля, свяжитесь с охраной " +
+                            "кошачьего приюта:\n" +
+                            "Телефон охраны: +7 (717) 111-CATS (2288)");
+
+                    break;
+                case CLICK_CAR_PASS_DOG:
+
+                    sendMessage(chatId, "Чтобы оформить пропуск для автомобиля, свяжитесь с охраной " +
+                            "собачьего приюта:\n" +
+                            "Телефон охраны: +7 (717) 111-CATS (2288)");
 
                     break;
 
