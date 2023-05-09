@@ -11,6 +11,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,6 +41,8 @@ class AnimalControllerTest {
     public static final PetType PET_CORRECT_TWO = PetType.CAT;
     public static final Color COLOR_CORRECT_ONE = Color.BLACK;
     public static final Color COLOR_CORRECT_TWO = Color.WHITE;
+
+    private static final Long TEST_ID = 1L;
 
     @Test
     public void saveAnimal_returns200_whenAnimalSavedSuccessfully() {
@@ -127,5 +130,25 @@ class AnimalControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(2, response.getBody().size());
+    }
+
+    @Test
+    public void testDeleteAdopterByIdSuccess() {
+        ResponseEntity<Void> expectedResponse = ResponseEntity.ok().build();
+        Mockito.doNothing().when(animalService).deleteAnimalById(TEST_ID);
+
+        ResponseEntity<Void> actualResponse = animalController.deleteAdopterById(TEST_ID);
+
+        assertEquals(expectedResponse, actualResponse);
+    }
+
+    @Test
+    public void testDeleteAdopterByIdNotFound() {
+        ResponseEntity<Void> expectedResponse = ResponseEntity.notFound().build();
+        Mockito.doThrow(new RuntimeException()).when(animalService).deleteAnimalById(TEST_ID);
+
+        ResponseEntity<Void> actualResponse = animalController.deleteAdopterById(TEST_ID);
+
+        assertEquals(expectedResponse, actualResponse);
     }
 }

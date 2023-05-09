@@ -132,5 +132,4 @@ class AnimalServiceImplTest {
         assertEquals(true, result.contains(animal1));
         assertEquals(true, result.contains(animal2));
     }
-
 }

@@ -9,6 +9,7 @@ import com.example.telegrambot.services.AdopterService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,6 +22,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.ArrayList;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -50,6 +52,7 @@ class AdopterControllerTest {
     private static final PetType CORRECT_PET_TYPE = PetType.DOG;
     private Animal animal;
     private Adopter adopter;
+    private static final Long TEST_ID = 1L;
 
     @MockBean
     private AdopterService adopterService;
@@ -109,5 +112,67 @@ class AdopterControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(2, response.getBody().size());
+    }
+    @Test
+    public void testFoundAdopterByIdSuccess() {
+        Adopter testAdopter = new Adopter();
+        testAdopter.setId(TEST_ID);
+        ResponseEntity<Adopter> expectedResponse = ResponseEntity.ok(testAdopter);
+        Mockito.when(adopterService.foundAdopterById(TEST_ID)).thenReturn(testAdopter);
+
+        ResponseEntity<Adopter> actualResponse = adopterController.foundAdopterById(TEST_ID);
+
+        assertEquals(expectedResponse, actualResponse);
+    }
+    @Test
+    public void testFoundAdopterByIdNotFound() {
+        ResponseEntity<Adopter> expectedResponse = ResponseEntity.notFound().build();
+        Mockito.doThrow(new RuntimeException()).when(adopterService).foundAdopterById(TEST_ID);
+
+        ResponseEntity<Adopter> actualResponse = adopterController.foundAdopterById(TEST_ID);
+
+        assertEquals(expectedResponse, actualResponse);
+    }
+
+    @Test
+    public void testGetAllAdoptersNotFound() {
+        ResponseEntity<Collection<Adopter>> expectedResponse = ResponseEntity.notFound().build();
+        Mockito.doThrow(new RuntimeException()).when(adopterService).getAllAdopter();
+
+        ResponseEntity<Collection<Adopter>> actualResponse = adopterController.getAllAdopter();
+
+        assertEquals(expectedResponse, actualResponse);
+    }
+    @Test
+    public void testDeleteAdopterByIdSuccess() {
+        ResponseEntity<Void> expectedResponse = ResponseEntity.ok().build();
+
+        ResponseEntity<Void> actualResponse = adopterController.deleteAdopterById(TEST_ID);
+
+        Mockito.verify(adopterService).deleteAdopterById(TEST_ID);
+        assertEquals(expectedResponse, actualResponse);
+    }
+
+    @Test
+    public void testDeleteAdopterByIdNotFound() {
+        ResponseEntity<Void> expectedResponse = ResponseEntity.notFound().build();
+        Mockito.doThrow(new RuntimeException()).when(adopterService).deleteAdopterById(TEST_ID);
+
+        ResponseEntity<Void> actualResponse = adopterController.deleteAdopterById(TEST_ID);
+
+        assertEquals(expectedResponse, actualResponse);
+    }
+
+    @Test
+    public void testUpdateAdopterNotFound() {
+        User user = new User();
+        Animal animal = new Animal();
+        Shelter shelter = new Shelter();
+        ResponseEntity<Void> expectedResponse = ResponseEntity.notFound().build();
+        Mockito.doThrow(new RuntimeException()).when(adopterService).updateAdopterById(TEST_ID, user, animal, shelter);
+
+        ResponseEntity<Void> actualResponse = adopterController.updateAdopter(TEST_ID, user, animal, shelter);
+
+        assertEquals(expectedResponse, actualResponse);
     }
 }
