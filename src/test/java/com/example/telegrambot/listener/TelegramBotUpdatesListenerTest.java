@@ -16,11 +16,10 @@ import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -58,6 +57,9 @@ class TelegramBotUpdatesListenerTest {
     private static final ShelterType CORRECT_SHELTER_TYPE = ShelterType.DOG_SHELTER;
     private static final String CORRECT_MAIL = "Ivan@mail.ru";
     private static final String CORRECT_ADDRESS = "Astana, lenina 12";
+
+
+    private TelegramBotUpdatesListener listener;
     @Test
     public void testSendMessageStart() { // Mock objects
         Update update = mock(Update.class);
@@ -195,5 +197,29 @@ class TelegramBotUpdatesListenerTest {
         Assertions.assertThat(actual.getParameters().get("chat_id")).isEqualTo(123);
         Assertions.assertThat(actual.getParameters().get("text")).isEqualTo(GREETINGS_AT_THE_DOG_SHELTER);
     }
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        listener = new TelegramBotUpdatesListener(userRequestService, telegramBot);
+    }
+
+    @Test
+    void testProcess_withMessage() {
+        Update update = mock(Update.class);
+        Message message = mock(Message.class);
+        when(update.message()).thenReturn(message);
+        listener.process(Collections.singletonList(update));
+        verify(userRequestService).sendMessageStart(update);
+    }
+
+    @Test
+    void testProcess_withButtonClick() {
+        Update update = mock(Update.class);
+        when(update.message()).thenReturn(null);
+        listener.process(Collections.singletonList(update));
+        verify(userRequestService).createButtonClick(update);
+    }
+
 
 }
+
