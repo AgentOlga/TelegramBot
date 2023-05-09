@@ -170,7 +170,7 @@ class UserControllerTest {
         assertEquals(2, response.getBody().size());
     }
     @Test
-    public void testGetAllAdopterNotFound() {
+    public void testElseGetAllAdopterNotFound() {
         Mockito.when(userService.getAllUser()).thenThrow(new RuntimeException("Error message"));
 
         ResponseEntity<Collection<User>> response = userController.getAllAdopter();

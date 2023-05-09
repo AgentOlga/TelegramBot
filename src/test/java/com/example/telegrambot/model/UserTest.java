@@ -190,7 +190,7 @@ class UserTest {
     }
 
     @Test
-    public void testSetAddress() {
+    public void CheckingTheCorrectAddressIsEntered() {
         String testAddress = "Astana, lenina 12";
         TestClass testObj = new TestClass();
         testObj.setAddress(testAddress);

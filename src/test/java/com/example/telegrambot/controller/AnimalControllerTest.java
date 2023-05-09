@@ -133,7 +133,7 @@ class AnimalControllerTest {
     }
 
     @Test
-    public void testDeleteAdopterByIdSuccess() {
+    public void checkingDeleteAdopterByIdSuccess() {
         ResponseEntity<Void> expectedResponse = ResponseEntity.ok().build();
         Mockito.doNothing().when(animalService).deleteAnimalById(TEST_ID);
 
@@ -143,7 +143,7 @@ class AnimalControllerTest {
     }
 
     @Test
-    public void testDeleteAdopterByIdNotFound() {
+    public void checkingDeleteAdopterByIdNotFound() {
         ResponseEntity<Void> expectedResponse = ResponseEntity.notFound().build();
         Mockito.doThrow(new RuntimeException()).when(animalService).deleteAnimalById(TEST_ID);
 
