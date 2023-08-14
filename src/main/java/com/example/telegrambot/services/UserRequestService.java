@@ -1,14 +1,22 @@
 package com.example.telegrambot.services;
 
 import com.pengrad.telegrambot.model.Update;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 
 /**
  * Сервис по работе с запросами пользователей.
  */
 
 public interface UserRequestService {
+
+    boolean checkReport(Update update);
+    boolean checkVolunteer(Update update);
+
+    boolean checkAdopter(Update update);
+
+    boolean checkUserInGuestCat(Update update);
+
+    boolean checkUserInGuestDog(Update update);
+
 
     /**
      * Отправление приветственного сообщения пользователю.

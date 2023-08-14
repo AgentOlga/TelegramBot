@@ -210,16 +210,53 @@ public class InlineKeyboardMarkupServiceImpl implements InlineKeyboardMarkupServ
     public InlineKeyboardMarkup createButtonsVolunteerMenu() {
 
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-
-
-
-        //todo остальные кнопки меню
-
-
+        inlineKeyboardMarkup.addRow(new InlineKeyboardButton(BUTTON_USER_MENU)
+                .callbackData(CLICK_BACK_TO_SHELTER_TYPE));
+        inlineKeyboardMarkup.addRow(new InlineKeyboardButton(BUTTON_RECORDING_NEW_ANIMAL)
+                .callbackData(CLICK_RECORDING_NEW_ANIMAL));
         inlineKeyboardMarkup.addRow(new InlineKeyboardButton(BUTTON_CHECK_REPORT)
                 .callbackData(CLICK_CHECK_REPORT));
+
+        return inlineKeyboardMarkup;
+    }
+
+    @Override
+    public InlineKeyboardMarkup createButtonsCheckReport() {
+
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         inlineKeyboardMarkup.addRow(new InlineKeyboardButton(BUTTON_FREE_MESSAGE)
                 .callbackData(CLICK_FREE_MESSAGE));
+        inlineKeyboardMarkup.addRow(new InlineKeyboardButton(BUTTON_OK)
+                .callbackData(CLICK_OK));
+        inlineKeyboardMarkup.addRow(new InlineKeyboardButton(BUTTON_NOT_OK)
+                .callbackData(CLICK_NOT_OK));
+
+        return inlineKeyboardMarkup;
+    }
+
+    @Override
+    public InlineKeyboardMarkup createButtonsCheckReportNotOk() {
+
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        inlineKeyboardMarkup.addRow(new InlineKeyboardButton(BUTTON_WARNING_REPORT)
+                .callbackData(CLICK_WARNING_REPORT));
+        inlineKeyboardMarkup.addRow(new InlineKeyboardButton(BUTTON_EXTEND)
+                .callbackData(CLICK_EXTEND));
+        inlineKeyboardMarkup.addRow(new InlineKeyboardButton(BUTTON_DELETE_ADOPTER)
+                .callbackData(CLICK_DELETE_ADOPTER));
+
+        return inlineKeyboardMarkup;
+    }
+
+    @Override
+    public InlineKeyboardMarkup createButtonsCheckReportNotOkExtend() {
+
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        inlineKeyboardMarkup.addRow(new InlineKeyboardButton(BUTTON_EXTEND_14_DAY)
+                .callbackData(CLICK_EXTEND_14_DAY));
+        inlineKeyboardMarkup.addRow(new InlineKeyboardButton(BUTTON_EXTEND_30_DAY)
+                .callbackData(CLICK_EXTEND_30_DAY));
+
         return inlineKeyboardMarkup;
     }
 }

@@ -29,6 +29,7 @@ class UserTest {
 
     private static final String EMPTY_VALUE = "";
     private static final String BLANK_VALUE = " ";
+
     private User user;
     private User userCorrect;
     private User userWrong;
@@ -104,6 +105,7 @@ class UserTest {
     public void CheckingForIncomingWrongDataFromTheMethodAddGuest() {
         assertNotEquals(guestCorrect, guestWrong);
     }
+
     @Test
     public void checkingForIncomingCorrectDataFromTheMethodAddAdopter() {
         assertEquals(adopterCorrect, adopter);
@@ -117,7 +119,7 @@ class UserTest {
     @Test
     public void shouldAddUserWithParameters() {
 
-        assertNotNull(user.getUserId());
+        assertNotNull(user.getTelegramId());
         assertNotNull(user.getTelegramNick());
         assertNotNull(user.getUserType());
         assertNotNull(user.getUserStatus());
@@ -126,7 +128,7 @@ class UserTest {
     @Test
     public void shouldAddGuestWithParameters() {
 
-        assertNotNull(guest.getUserId());
+        assertNotNull(guest.getTelegramId());
         assertNotNull(guest.getTelegramNick());
         assertNotNull(guest.getUserType());
         assertNotNull(guest.getUserStatus());
@@ -140,7 +142,7 @@ class UserTest {
     @Test
     public void shouldAddAdopterWithParameters() {
 
-        assertNotNull(adopter.getUserId());
+        assertNotNull(adopter.getTelegramId());
         assertNotNull(adopter.getTelegramNick());
         assertNotNull(adopter.getUserType());
         assertNotNull(adopter.getUserStatus());
@@ -187,4 +189,22 @@ class UserTest {
         assertEquals(user.getTelegramNick(), ConstantValue.DEFAULT_TELEGRAM_NICK);
     }
 
+    @Test
+    public void CheckingTheCorrectAddressIsEntered() {
+        String testAddress = "Astana, lenina 12";
+        TestClass testObj = new TestClass();
+        testObj.setAddress(testAddress);
+        assertEquals(testAddress, CORRECT_ADDRESS);
+    }
+
+
+    class TestClass {
+        private String address;
+        public void setAddress(String address) {
+            this.address = address;
+        }
+        public String getAddress() {
+            return address;
+        }
+    }
 }
